@@ -60,14 +60,20 @@ func (s *Storage) AddOrder(order models.Order) error {
 	}
 
 	s.orders = append(s.orders, order)
-	return s.save()
+	if err := s.save(); err != nil {
+		return fmt.Errorf("failed to save order: %w", err)
+	}
+	return nil
 }
 
 func (s *Storage) UpdateOrder(order models.Order) error {
 	for i, o := range s.orders {
 		if o.ID == order.ID {
 			s.orders[i] = order
-			return s.save()
+			if err := s.save(); err != nil {
+				return fmt.Errorf("failed to save order: %w", err)
+			}
+			return nil
 		}
 	}
 	return fmt.Errorf("order with id %d not found", order.ID)
@@ -77,7 +83,10 @@ func (s *Storage) DeleteOrder(id uint) error {
 	for i, order := range s.orders {
 		if order.ID == id {
 			s.orders = append(s.orders[:i], s.orders[i+1:]...)
-			return s.save()
+			if err := s.save(); err != nil {
+				return fmt.Errorf("failed to save order: %w", err)
+			}
+			return nil
 		}
 	}
 	return fmt.Errorf("order with id %d not found", id)

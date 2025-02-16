@@ -94,6 +94,42 @@ func (s *OrderService) DeliverOrders(customerID uint, orderIDs ...uint) error {
 	return nil
 }
 
+// Helper function to check if order belongs to customer
+func (s *OrderService) isOrderBelongsToCustomer(order *models.Order, customerID uint) error {
+	if order.CustomerID != customerID {
+		return fmt.Errorf("%w : %d", models.ErrOrderNotBelongToCustomer, order.ID)
+	}
+	return nil
+}
+
+// Helper function to check if order can be returned
+func (s *OrderService) canOrderBeReturned(order *models.Order) error {
+	if order.Status != models.StatusDelivered {
+		return models.ErrOrderCannotBeReturned
+	}
+	return nil
+}
+
+// Helper function to check if order can be delivered
+func (s *OrderService) canOrderBeDelivered(order *models.Order) error {
+	if order.Status != models.StatusNew {
+		return models.ErrOrderCannotBeDelivered
+	}
+	return nil
+}
+
+// Helper function to update order status
+func (s *OrderService) updateOrderStatus(order *models.Order, status models.OrderStatus) error {
+	order.Status = status
+	order.UpdatedAt = time.Now()
+	return s.storage.UpdateOrder(*order)
+}
+
+// Helper function to delete order
+func (s *OrderService) deleteOrder(orderID uint) error {
+	return s.storage.DeleteOrder(orderID)
+}
+
 // принять возвраты клиента
 func (s *OrderService) AcceptReturns(customerID uint, orderIDs ...uint) error {
 	for _, id := range orderIDs {
@@ -102,18 +138,15 @@ func (s *OrderService) AcceptReturns(customerID uint, orderIDs ...uint) error {
 			return err
 		}
 
-		if order.CustomerID != customerID {
-			return fmt.Errorf("%w : %d", models.ErrOrderNotBelongToCustomer, id)
+		if err := s.isOrderBelongsToCustomer(order, customerID); err != nil {
+			return err
 		}
 
-		if order.Status != models.StatusDelivered {
-			return models.ErrOrderCannotBeReturned
+		if err := s.canOrderBeReturned(order); err != nil {
+			return err
 		}
 
-		order.Status = models.StatusReturned
-		order.UpdatedAt = time.Now()
-
-		if err := s.storage.UpdateOrder(*order); err != nil {
+		if err := s.updateOrderStatus(order, models.StatusReturned); err != nil {
 			return err
 		}
 	}

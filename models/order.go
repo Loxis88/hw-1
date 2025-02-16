@@ -15,14 +15,14 @@ const (
 )
 
 var (
-	ErrOrderAlreadyExists       = errors.New("заказ уже существует")            // заказ уже существует
-	ErrInvalidStorageDate       = errors.New("некорректная дата хранения")      // некорректная дата хранения
-	ErrOrderCannotBeReturned    = errors.New("заказ не может быть возвращен")   // заказ не может быть возвращен
-	ErrOrderCannotBeDelivered   = errors.New("заказ не может быть выдан")       // заказ не может быть выдан
-	ErrStoragePeriodExpired     = errors.New("срок хранения истек")             // срок хранения истек
-	ErrStoragePeriodNotExpired  = errors.New("срок хранения еще не истек")      // срок хранения еще не истек
-	ErrReturnPeriodExpired      = errors.New("срок возврата истек")             // срок возврата истек
-	ErrOrderNotBelongToCustomer = errors.New("заказ не принадлежит покупателю") // заказ не принадлежит покупателю
+	ErrOrderAlreadyExists       = errors.New("order already exists")
+	ErrInvalidStorageDate       = errors.New("invalid storage date")
+	ErrOrderCannotBeReturned    = errors.New("order cannot be returned")
+	ErrOrderCannotBeDelivered   = errors.New("order cannot be delivered")
+	ErrStoragePeriodExpired     = errors.New("storage period expired")
+	ErrStoragePeriodNotExpired  = errors.New("storage period not expired yet")
+	ErrReturnPeriodExpired      = errors.New("return period expired")
+	ErrOrderNotBelongToCustomer = errors.New("order does not belong to customer")
 )
 
 type Order struct {
