@@ -8,6 +8,16 @@ import (
 	"hw-1/storage/json_storage"
 )
 
+type OrderStorage interface {
+	AddOrder(order models.Order) error
+	UpdateOrder(order models.Order) error
+	DeleteOrder(id uint) error
+	GetOrders() []models.Order
+	GetOrdersByCustomer(customerID uint, lastN int, inStorageOnly bool) []models.Order
+	FindOrder(id uint) (*models.Order, error)
+	GetExpiredOrders() []models.Order
+}
+
 type OrderService struct {
 	storage *json_storage.Storage
 }
