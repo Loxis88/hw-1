@@ -29,6 +29,6 @@ type Order struct {
 	ID           uint        `json:"id"`
 	CustomerID   uint        `json:"customer_id"`
 	StorageUntil time.Time   `json:"storage_until"`
-	Status       OrderStatus `json:"-"`
+	Status       OrderStatus `json:"status"`
 	DeliveredAt  time.Time   `json:"delivered_at,omitempty"`
 }

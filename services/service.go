@@ -5,11 +5,11 @@ import (
 	"time"
 
 	"hw-1/models"
-	"hw-1/storage/json_storage"
+	"hw-1/storage"
 )
 
-type OrderStorage interface {
-	AddOrder(order models.Order) error
+type OrderServiceInterface interface {
+	CreateOrder(order models.Order) error
 	UpdateOrder(order models.Order) error
 	DeleteOrder(id uint) error
 	GetOrders() []models.Order
@@ -18,15 +18,14 @@ type OrderStorage interface {
 	GetExpiredOrders() []models.Order
 }
 
+// Проверка реализации интерфейса
+var _ OrderServiceInterface = (*OrderService)(nil)
+
 type OrderService struct {
-	storage *json_storage.Storage
+	storage storage.OrderStorage
 }
 
-func New(path string) *OrderService {
-	storage, err := json_storage.New(path)
-	if err != nil {
-		panic(err)
-	}
+func New(storage storage.OrderStorage) OrderServiceInterface {
 	return &OrderService{storage: storage}
 }
 
