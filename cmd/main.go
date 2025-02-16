@@ -103,125 +103,27 @@ func main() {
 		return
 
 	case AcceptOrderCommand:
-		orderID := flag.Uint("order-id", 0, "orderID")
-		receiverID := flag.Uint("receiver-id", 0, "receiverID")
-		storageDuration := flag.Uint("storage-duration", 0, "duration")
-
-		flag.Parse()
-
-		if flag.NFlag() != 3 || *orderID == 0 || *receiverID == 0 || *storageDuration == 0 {
-			fmt.Println("Invalid arguments")
-			return
-		}
-
-		if err := service.AcceptOrder(*orderID, *receiverID, time.Now().Add(time.Duration(*storageDuration)*time.Hour*24)); err != nil {
-			fmt.Println("Error accepting order:", err)
-		}
-
-		fmt.Println("Order accepted successfully")
+		handleAcceptOrder(service)
 		return
 
 	case ReturnOrderCommand:
-		var orderID = flag.Uint("order-id", 0, "orderID")
-		flag.Parse()
-
-		if flag.NFlag() != 1 || *orderID == 0 {
-			fmt.Println("Invalid arguments")
-			return
-		}
-
-		if err := service.ReturnOrderToCourier(*orderID); err != nil {
-			fmt.Println("Error returning order:", err)
-		}
-
-		fmt.Println("Order returned successfully")
+		handleReturnOrder(service)
 		return
 
 	case ProcessOrdersCommand:
-		clientID := flag.Uint("client-id", 0, "clientID")
-		orderIDs := flag.String("order-ids", "", "orderIDs")
-		action := flag.String("action", "", "action")
-		flag.Parse()
-
-		if flag.NFlag() < 3 {
-			fmt.Println("Invalid arguments")
-			return
-		}
-		if *action != "return" && *action != "issue" {
-			fmt.Println("Invalid action")
-			return
-		}
-
-		orders := strings.Split(*orderIDs, ",")
-		var ids []uint = make([]uint, len(orders))
-
-		for i, _ := range orders {
-			id, err := strconv.Atoi(orders[i])
-			if err != nil {
-				fmt.Println("Invalid order ID:", orders[i])
-				return
-			}
-			ids[i] = uint(id)
-		}
-		switch *action {
-		case "return":
-			if err := service.AcceptReturns(*clientID, ids...); err != nil {
-				fmt.Println("Error accepting orders:", err)
-				return
-			}
-			fmt.Println("Заказы успешно приняты")
-			return
-		case "issue":
-			if err := service.DeliverOrders(*clientID, ids...); err != nil {
-				fmt.Println("Error returning orders:", err)
-				return
-			}
-			fmt.Println("Заказы успешно выданы")
-			return
-		}
+		handleProcessOrders(service)
 		return
+
 	case ListOrdersCommand:
-		customerID := flag.Uint("client-id", 0, "clientID")
-		limit := flag.Int("limit", 0, "limit")
-		flag.Parse()
-
-		if *customerID == 0 {
-			fmt.Println("Invalid client ID")
-			return
-		}
-
-		orders, err := service.GetCustomerOrders(*customerID, *limit)
-		if err != nil {
-			fmt.Println("Error listing orders:", err)
-			return
-		}
-		fmt.Println("Orders:", orders)
+		handleListOrders(service)
 		return
 
 	case ListReturnsCommand:
-		returns, err := service.GetReturnedOrders()
-		if err != nil {
-			fmt.Println("Error listing returns:", err)
-			return
-		}
-		fmt.Println("Returns:", returns)
+		handleListReturns(service)
 		return
 
 	case OrderHistoryCommand:
-		customerID := flag.Int("client-id", 0, "clientID")
-		flag.Parse()
-
-		if *customerID == 0 {
-			fmt.Println("Invalid client ID")
-			return
-		}
-
-		history, err := service.GetOrderHistory(*customerID)
-		if err != nil {
-			fmt.Println("Error listing order history:", err)
-			return
-		}
-		fmt.Println("Order History:", history)
+		handleOrderHistory(service)
 		return
 
 	default:
@@ -231,22 +133,131 @@ func main() {
 	}
 }
 
-/*
-service.AcceptOrder(10, 15, time.Now().Add(time.Hour))
+// handleAcceptOrder processes the accept-order command
+func handleAcceptOrder(service services.OrderServiceInterface) {
+	orderID := flag.Uint("order-id", 0, "orderID")
+	receiverID := flag.Uint("receiver-id", 0, "receiverID")
+	storageDuration := flag.Uint("storage-duration", 0, "duration")
 
-	// Call GetOrderHistory method and print the result
-	orderHistory, err := service.GetOrderHistory(10)
-	if err != nil {
-		fmt.Println("Error fetching order history:", err)
-	} else {
-		fmt.Println("Order History:", orderHistory)
+	flag.Parse()
+
+	if flag.NFlag() != 3 || *orderID == 0 || *receiverID == 0 || *storageDuration == 0 {
+		fmt.Println("Invalid arguments")
+		return
 	}
 
-	// Call GetReturnedOrders method and print the result
-	returnedOrders, err := service.GetReturnedOrders()
-	if err != nil {
-		fmt.Println("Error fetching returned orders:", err)
-	} else {
-		fmt.Println("Returned Orders:", returnedOrders)
+	if err := service.AcceptOrder(*orderID, *receiverID, time.Now().Add(time.Duration(*storageDuration)*time.Hour*24)); err != nil {
+		fmt.Println("Error accepting order:", err)
 	}
-*/
+
+	fmt.Println("Order accepted successfully")
+}
+
+// handleReturnOrder processes the return-order command
+func handleReturnOrder(service services.OrderServiceInterface) {
+	var orderID = flag.Uint("order-id", 0, "orderID")
+	flag.Parse()
+
+	if flag.NFlag() != 1 || *orderID == 0 {
+		fmt.Println("Invalid arguments")
+		return
+	}
+
+	if err := service.ReturnOrderToCourier(*orderID); err != nil {
+		fmt.Println("Error returning order:", err)
+	}
+
+	fmt.Println("Order returned successfully")
+}
+
+// handleProcessOrders processes the process-orders command
+func handleProcessOrders(service services.OrderServiceInterface) {
+	clientID := flag.Uint("client-id", 0, "clientID")
+	orderIDs := flag.String("order-ids", "", "orderIDs")
+	action := flag.String("action", "", "action")
+	flag.Parse()
+
+	if flag.NFlag() < 3 {
+		fmt.Println("Invalid arguments")
+		return
+	}
+	if *action != "return" && *action != "issue" {
+		fmt.Println("Invalid action")
+		return
+	}
+
+	orders := strings.Split(*orderIDs, ",")
+	var ids []uint = make([]uint, len(orders))
+
+	for i, _ := range orders {
+		id, err := strconv.Atoi(orders[i])
+		if err != nil {
+			fmt.Println("Invalid order ID:", orders[i])
+			return
+		}
+		ids[i] = uint(id)
+	}
+	switch *action {
+	case "return":
+		if err := service.AcceptReturns(*clientID, ids...); err != nil {
+			fmt.Println("Error accepting orders:", err)
+			return
+		}
+		fmt.Println("Заказы успешно приняты")
+		return
+	case "issue":
+		if err := service.DeliverOrders(*clientID, ids...); err != nil {
+			fmt.Println("Error returning orders:", err)
+			return
+		}
+		fmt.Println("Заказы успешно выданы")
+		return
+	}
+}
+
+// handleListOrders processes the list-orders command
+func handleListOrders(service services.OrderServiceInterface) {
+	customerID := flag.Uint("client-id", 0, "clientID")
+	limit := flag.Int("limit", 0, "limit")
+	flag.Parse()
+
+	if *customerID == 0 {
+		fmt.Println("Invalid client ID")
+		return
+	}
+
+	orders, err := service.GetCustomerOrders(*customerID, *limit)
+	if err != nil {
+		fmt.Println("Error listing orders:", err)
+		return
+	}
+	fmt.Println("Orders:", orders)
+}
+
+// handleListReturns processes the list-returns command
+func handleListReturns(service services.OrderServiceInterface) {
+	returns, err := service.GetReturnedOrders()
+	if err != nil {
+		fmt.Println("Error listing returns:", err)
+		return
+	}
+	fmt.Println("Returns:", returns)
+}
+
+// handleOrderHistory processes the order-history command
+func handleOrderHistory(service services.OrderServiceInterface) {
+	customerID := flag.Int("client-id", 0, "clientID")
+	flag.Parse()
+
+	if *customerID == 0 {
+		fmt.Println("Invalid client ID")
+		return
+	}
+
+	history, err := service.GetOrderHistory(*customerID)
+	if err != nil {
+		fmt.Println("Error listing order history:", err)
+		return
+	}
+	fmt.Println("Order History:", history)
+}
