@@ -7,5 +7,4 @@ import (
 func main() {
 	serv := services.New("data.json")
 
-	serv.Test()
 }

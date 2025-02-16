@@ -17,47 +17,97 @@ func New(path string) *OrderService {
 	if err != nil {
 		panic(err)
 	}
-	return &OrderService{
-		storage: storage,
-	}
+	return &OrderService{storage: storage}
 }
 
-func (s *OrderService) AcceptOrder(orderID uint, customerID uint, StorageDate time.Time) error {
+// Принять заказ от курьера
+func (s *OrderService) AcceptOrder(orderID uint, customerID uint, storageDate time.Time) error {
 	if find, _ := s.storage.FindOrder(orderID); find != nil {
-		return fmt.Errorf("order already exists") // добавить кастомные ошибки типа models.ErrOrderAlreadyExists
+		return models.ErrOrderAlreadyExists
 	}
 
-	// Проверяем, что срок хранения не в прошлом
-	if StorageDate.Before(time.Now()) {
-		return fmt.Errorf("срок хранения в прошлом")
+	if storageDate.Before(time.Now()) {
+		return models.ErrInvalidStorageDate
 	}
 
 	newOrder := models.Order{
-		ID:          orderID,
-		CustomerID:  customerID,
-		StorageDate: StorageDate,
-		Status:      "accepted", // доавить константы models.OrderStatusAccepted, models.OrderStatusIssued
+		ID:           orderID,
+		CustomerID:   customerID,
+		StorageUntil: storageDate,
+		Status:       models.StatusNew,
 	}
 
-	err := s.storage.AddOrder(newOrder)
-	if err != nil {
-		return err
-	}
-	return nil
+	return s.storage.AddOrder(newOrder)
 }
 
-func (s *OrderService) ReturnOrder(orderID uint) error {
+// Вернуть заказ курьеру
+func (s *OrderService) ReturnOrderToCourier(orderID uint) error {
 	order, err := s.storage.FindOrder(orderID)
 	if err != nil {
 		return err
 	}
-	if order.Status == "issued" {
-		return fmt.Errorf("order already issued")
+
+	if order.Status == models.StatusNew {
+		return models.ErrOrderCannotBeReturned
 	}
-	s.storage.DeleteOrder(order.ID)
+
+	if time.Now().Before(order.StorageUntil) {
+		return models.ErrStoragePeriodNotExpired
+	}
+
+	return s.storage.DeleteOrder(orderID)
+}
+
+// Выдать заказы
+func (s *OrderService) DeliverOrders(customerID uint, orderIDs ...uint) error {
+	for _, id := range orderIDs {
+		order, err := s.storage.FindOrder(id)
+		if err != nil {
+			return err
+		}
+
+		if order.CustomerID != customerID {
+			return fmt.Errorf("%w : %d", models.ErrOrderNotBelongToCustomer, id)
+		}
+
+		if order.Status != models.StatusNew {
+			return models.ErrOrderCannotBeDelivered
+		}
+
+		order.Status = models.StatusDelivered
+		if err := s.storage.UpdateOrder(*order); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
-func (s *OrderService) Test() {
-	s.storage.Test()
+// принять возвраты клиента
+func (s *OrderService) AcceptReturns(customerID uint, orderIDs ...uint) error {
+	for _, id := range orderIDs {
+		order, err := s.storage.FindOrder(id)
+		if err != nil {
+			return err
+		}
+
+		if order.CustomerID != customerID {
+			return fmt.Errorf("%w : %d", models.ErrOrderNotBelongToCustomer, id)
+		}
+
+		if order.Status != models.StatusDelivered {
+			return models.ErrOrderCannotBeReturned
+		}
+
+		order.Status = models.StatusReturned
+		if err := s.storage.UpdateOrder(*order); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *OrderService) GetCustomerOrders(customerID uint, limit int, inStorageOnly bool) ([]models.Order, error) {
+	return s.storage.GetOrdersByCustomer(customerID, limit, inStorageOnly), nil
 }
