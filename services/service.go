@@ -15,6 +15,7 @@ type OrderServiceInterface interface {
 	DeliverOrders(customerID uint, orderIDs ...uint) error
 	AcceptReturns(customerID uint, orderIDs ...uint) error
 	GetCustomerOrders(customerID uint, limit int, inStorageOnly bool) ([]models.Order, error)
+	GetOrderHistory(limit int) ([]models.Order, error)
 }
 
 // Проверка реализации интерфейса
@@ -43,6 +44,7 @@ func (s *OrderService) AcceptOrder(orderID uint, customerID uint, storageDate ti
 		CustomerID:   customerID,
 		StorageUntil: storageDate,
 		Status:       models.StatusNew,
+		UpdatedAt:    time.Now(),
 	}
 
 	return s.storage.AddOrder(newOrder)
@@ -83,6 +85,7 @@ func (s *OrderService) DeliverOrders(customerID uint, orderIDs ...uint) error {
 		}
 
 		order.Status = models.StatusDelivered
+		order.UpdatedAt = time.Now()
 		if err := s.storage.UpdateOrder(*order); err != nil {
 			return err
 		}
@@ -108,6 +111,7 @@ func (s *OrderService) AcceptReturns(customerID uint, orderIDs ...uint) error {
 		}
 
 		order.Status = models.StatusReturned
+		order.UpdatedAt = time.Now()
 		if err := s.storage.UpdateOrder(*order); err != nil {
 			return err
 		}
@@ -118,4 +122,14 @@ func (s *OrderService) AcceptReturns(customerID uint, orderIDs ...uint) error {
 
 func (s *OrderService) GetCustomerOrders(customerID uint, limit int, inStorageOnly bool) ([]models.Order, error) {
 	return s.storage.GetOrdersByCustomer(customerID, limit, inStorageOnly), nil
+}
+
+func (s *OrderService) ReturnedList() {
+	orders := s.storage.GetExpiredOrders()
+
+	for _, order := range orders {
+		if order.Status == models.StatusReturned {
+			fmt.Println(order)
+		}
+	}
 }

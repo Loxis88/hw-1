@@ -31,4 +31,5 @@ type Order struct {
 	StorageUntil time.Time   `json:"storage_until"`
 	Status       OrderStatus `json:"status"`
 	DeliveredAt  time.Time   `json:"delivered_at,omitempty"`
+	UpdatedAt    time.Time   `json:"updated_at"`
 }

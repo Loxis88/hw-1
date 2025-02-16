@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"sort"
 	"time"
 
 	"hw-1/models"
@@ -125,4 +126,33 @@ func (s *Storage) GetExpiredOrders() []models.Order {
 	}
 
 	return expired
+}
+
+func (s *Storage) GetReturnedOrders() []models.Order {
+	orders := s.GetOrders()
+
+	var result []models.Order
+	for _, order := range orders {
+		if order.Status == models.StatusReturned {
+			result = append(result, order)
+		}
+	}
+	return result
+}
+
+func (s *Storage) GetOrdersHistory(limit int) ([]models.Order, error) {
+	// Получаем все заказы
+	orders := s.GetOrders()
+
+	// Сортируем по времени обновления (в порядке убывания)
+	sort.Slice(orders, func(i, j int) bool {
+		return orders[i].UpdatedAt.After(orders[j].UpdatedAt)
+	})
+
+	// Применяем лимит
+	if len(orders) > limit {
+		orders = orders[:limit]
+	}
+
+	return orders, nil
 }
