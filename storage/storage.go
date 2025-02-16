@@ -13,6 +13,8 @@ type OrderStorage interface {
     GetOrdersByCustomer(customerID uint, lastN int, inStorageOnly bool) []models.Order
     FindOrder(id uint) (*models.Order, error)
     GetExpiredOrders() []models.Order
+    GetOrdersHistory(limit int) ([]models.Order, error)
+    GetReturnedOrders() []models.Order
 }
 
 // Функция для создания нового хранилища

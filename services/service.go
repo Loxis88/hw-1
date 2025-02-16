@@ -16,6 +16,7 @@ type OrderServiceInterface interface {
 	AcceptReturns(customerID uint, orderIDs ...uint) error
 	GetCustomerOrders(customerID uint, limit int, inStorageOnly bool) ([]models.Order, error)
 	GetOrderHistory(limit int) ([]models.Order, error)
+	GetReturnedOrders() ([]models.Order, error)
 }
 
 // Проверка реализации интерфейса
@@ -156,6 +157,14 @@ func (s *OrderService) AcceptReturns(customerID uint, orderIDs ...uint) error {
 
 func (s *OrderService) GetCustomerOrders(customerID uint, limit int, inStorageOnly bool) ([]models.Order, error) {
 	return s.storage.GetOrdersByCustomer(customerID, limit, inStorageOnly), nil
+}
+
+func (s *OrderService) GetOrderHistory(limit int) ([]models.Order, error) {
+	return s.storage.GetOrdersHistory(limit)
+}
+
+func (s *OrderService) GetReturnedOrders() ([]models.Order, error) {
+	return s.storage.GetReturnedOrders(), nil
 }
 
 func (s *OrderService) ReturnedList() {
