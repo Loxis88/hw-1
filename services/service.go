@@ -112,6 +112,7 @@ func (s *OrderService) AcceptReturns(customerID uint, orderIDs ...uint) error {
 
 		order.Status = models.StatusReturned
 		order.UpdatedAt = time.Now()
+
 		if err := s.storage.UpdateOrder(*order); err != nil {
 			return err
 		}
