@@ -1,12 +1,11 @@
 package main
 
 import (
-	"flag"
 	"fmt"
-	"os"
 	"hw-1/handlers"
 	"hw-1/services"
 	"hw-1/storage"
+	"os"
 )
 
 type command string
@@ -20,6 +19,51 @@ const (
 	OrderHistoryCommand  command = "order-history"
 	HelpCommand          command = "help"
 )
+
+func main() {
+	store, err := storage.NewJsonStorage("data.json")
+	if err != nil {
+		panic(err)
+	}
+
+	var service services.OrderServiceInterface = services.New(store)
+	mainArg := command(os.Args[1])
+
+	switch mainArg {
+	case HelpCommand:
+		fmt.Println(helpMessage)
+		return
+
+	case AcceptOrderCommand:
+		handlers.HandleAcceptOrder(service)
+		return
+
+	case ReturnOrderCommand:
+		handlers.HandleReturnOrder(service)
+		return
+
+	case ProcessOrdersCommand:
+		handlers.HandleProcessOrders(service)
+		return
+
+	case ListOrdersCommand:
+		handlers.HandleListOrders(service)
+		return
+
+	case ListReturnsCommand:
+		handlers.HandleListReturns(service)
+		return
+
+	case OrderHistoryCommand:
+		handlers.HandleOrderHistory(service)
+		return
+
+	default:
+		fmt.Println("Invalid command")
+		fmt.Println(helpMessage)
+		return
+	}
+}
 
 const helpMessage = `Доступные команды:
 
@@ -83,49 +127,3 @@ const helpMessage = `Доступные команды:
    Описание: Выводит список доступных команд и их описание.
    Пример:
      help`
-
-func main() {
-	store, err := storage.NewJsonStorage("data.json")
-	if err != nil {
-		panic(err)
-	}
-	var service services.OrderServiceInterface = services.New(store)
-	_ = service
-
-	mainArg := command(os.Args[1])
-
-	switch mainArg {
-	case HelpCommand:
-		fmt.Println(helpMessage)
-		return
-
-	case AcceptOrderCommand:
-		handlers.HandleAcceptOrder(service)
-		return
-
-	case ReturnOrderCommand:
-		handlers.HandleReturnOrder(service)
-		return
-
-	case ProcessOrdersCommand:
-		handlers.HandleProcessOrders(service)
-		return
-
-	case ListOrdersCommand:
-		handlers.HandleListOrders(service)
-		return
-
-	case ListReturnsCommand:
-		handlers.HandleListReturns(service)
-		return
-
-	case OrderHistoryCommand:
-		handlers.HandleOrderHistory(service)
-		return
-
-	default:
-		fmt.Println("Invalid command")
-		fmt.Println(helpMessage)
-		return
-	}
-}
