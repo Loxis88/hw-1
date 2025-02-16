@@ -8,7 +8,7 @@ import (
 	"hw-1/services"
 )
 
-// handleAcceptOrder processes the accept-order command
+// HandleAcceptOrder processes the accept-order command
 func HandleAcceptOrder(service services.OrderServiceInterface) {
 	orderID := flag.Uint("order-id", 0, "orderID")
 	receiverID := flag.Uint("receiver-id", 0, "receiverID")

@@ -9,7 +9,7 @@ import (
 	"hw-1/services"
 )
 
-// handleProcessOrders processes the process-orders command
+// HandleProcessOrders processes the process-orders command
 func HandleProcessOrders(service services.OrderServiceInterface) {
 	clientID := flag.Uint("client-id", 0, "clientID")
 	orderIDs := flag.String("order-ids", "", "orderIDs")
