@@ -14,7 +14,7 @@ type OrderServiceInterface interface {
 	ReturnOrderToCourier(orderID uint) error
 	DeliverOrders(customerID uint, orderIDs ...uint) error
 	AcceptReturns(customerID uint, orderIDs ...uint) error
-	GetCustomerOrders(customerID uint, limit int, inStorageOnly bool) ([]models.Order, error)
+	GetCustomerOrders(customerID uint, limit int) ([]models.Order, error)
 	GetOrderHistory(limit int) ([]models.Order, error)
 	GetReturnedOrders() ([]models.Order, error)
 }
@@ -155,8 +155,8 @@ func (s *OrderService) AcceptReturns(customerID uint, orderIDs ...uint) error {
 	return nil
 }
 
-func (s *OrderService) GetCustomerOrders(customerID uint, limit int, inStorageOnly bool) ([]models.Order, error) {
-	return s.storage.GetOrdersByCustomer(customerID, limit, inStorageOnly), nil
+func (s *OrderService) GetCustomerOrders(customerID uint, limit int) ([]models.Order, error) {
+	return s.storage.GetOrdersByCustomer(customerID, limit), nil
 }
 
 func (s *OrderService) GetOrderHistory(limit int) ([]models.Order, error) {

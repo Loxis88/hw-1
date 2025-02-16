@@ -96,12 +96,12 @@ func (s *Storage) GetOrders() []models.Order {
 	return s.orders
 }
 
-func (s *Storage) GetOrdersByCustomer(customerID uint, lastN int, inStorageOnly bool) []models.Order {
+func (s *Storage) GetOrdersByCustomer(customerID uint, lastN int) []models.Order {
 	var result []models.Order
 
 	for _, order := range s.orders {
 		if order.CustomerID == customerID {
-			if inStorageOnly && order.Status != models.StatusNew {
+			if order.Status != models.StatusNew {
 				continue
 			}
 			result = append(result, order)
