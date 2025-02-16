@@ -53,7 +53,7 @@ func (s *Storage) save() error {
 	return nil
 }
 
-// AddOrder добавляет новый заказ
+// AddOrder adds a new order to the storage
 func (s *Storage) AddOrder(order models.Order) error {
 	if _, err := s.FindOrder(order.ID); err == nil {
 		return fmt.Errorf("order with id %d already exists", order.ID)
@@ -66,6 +66,7 @@ func (s *Storage) AddOrder(order models.Order) error {
 	return nil
 }
 
+// UpdateOrder updates an existing order in the storage
 func (s *Storage) UpdateOrder(order models.Order) error {
 	for i, o := range s.orders {
 		if o.ID == order.ID {
@@ -79,6 +80,7 @@ func (s *Storage) UpdateOrder(order models.Order) error {
 	return fmt.Errorf("order with id %d not found", order.ID)
 }
 
+// DeleteOrder deletes an order from the storage
 func (s *Storage) DeleteOrder(id uint) error {
 	for i, order := range s.orders {
 		if order.ID == id {
@@ -92,10 +94,12 @@ func (s *Storage) DeleteOrder(id uint) error {
 	return fmt.Errorf("order with id %d not found", id)
 }
 
+// GetOrders retrieves all orders from the storage
 func (s *Storage) GetOrders() []models.Order {
 	return s.orders
 }
 
+// GetOrdersByCustomer retrieves orders for a specific customer
 func (s *Storage) GetOrdersByCustomer(customerID uint, lastN int) []models.Order {
 	var result []models.Order
 
@@ -115,6 +119,7 @@ func (s *Storage) GetOrdersByCustomer(customerID uint, lastN int) []models.Order
 	return result
 }
 
+// FindOrder finds an order by its ID
 func (s *Storage) FindOrder(id uint) (*models.Order, error) {
 	for i, order := range s.orders {
 		if order.ID == id {
@@ -124,6 +129,7 @@ func (s *Storage) FindOrder(id uint) (*models.Order, error) {
 	return nil, fmt.Errorf("order with id %d not found", id)
 }
 
+// GetExpiredOrders retrieves orders that have expired
 func (s *Storage) GetExpiredOrders() []models.Order {
 	var expired []models.Order
 	now := time.Now()
@@ -137,6 +143,7 @@ func (s *Storage) GetExpiredOrders() []models.Order {
 	return expired
 }
 
+// GetReturnedOrders retrieves orders that have been returned
 func (s *Storage) GetReturnedOrders() []models.Order {
 	orders := s.GetOrders()
 
@@ -149,16 +156,14 @@ func (s *Storage) GetReturnedOrders() []models.Order {
 	return result
 }
 
+// GetOrdersHistory retrieves the order history
 func (s *Storage) GetOrdersHistory(limit int) ([]models.Order, error) {
-	// Получаем все заказы
 	orders := s.GetOrders()
 
-	// Сортируем по времени обновления (в порядке убывания)
 	sort.Slice(orders, func(i, j int) bool {
 		return orders[i].UpdatedAt.After(orders[j].UpdatedAt)
 	})
 
-	// Применяем лимит
 	if len(orders) > limit {
 		orders = orders[:limit]
 	}

@@ -8,6 +8,7 @@ import (
 	"hw-1/storage"
 )
 
+// OrderServiceInterface defines the interface for order service operations
 type OrderServiceInterface interface {
 	// Основные операции с заказами
 	AcceptOrder(orderID uint, customerID uint, storageDate time.Time) error
@@ -22,10 +23,12 @@ type OrderServiceInterface interface {
 // Проверка реализации интерфейса
 var _ OrderServiceInterface = (*OrderService)(nil)
 
+// OrderService implements the OrderServiceInterface
 type OrderService struct {
 	storage storage.OrderStorage
 }
 
+// New creates a new instance of OrderService
 func New(storage storage.OrderStorage) OrderServiceInterface {
 	return &OrderService{storage: storage}
 }
@@ -155,18 +158,22 @@ func (s *OrderService) AcceptReturns(customerID uint, orderIDs ...uint) error {
 	return nil
 }
 
+// GetCustomerOrders retrieves orders for a specific customer
 func (s *OrderService) GetCustomerOrders(customerID uint, limit int) ([]models.Order, error) {
 	return s.storage.GetOrdersByCustomer(customerID, limit), nil
 }
 
+// GetOrderHistory retrieves the order history
 func (s *OrderService) GetOrderHistory(limit int) ([]models.Order, error) {
 	return s.storage.GetOrdersHistory(limit)
 }
 
+// GetReturnedOrders retrieves the returned orders
 func (s *OrderService) GetReturnedOrders() ([]models.Order, error) {
 	return s.storage.GetReturnedOrders(), nil
 }
 
+// ReturnedList prints the list of returned orders
 func (s *OrderService) ReturnedList() {
 	orders := s.storage.GetExpiredOrders()
 
