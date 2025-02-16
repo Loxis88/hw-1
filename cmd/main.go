@@ -2,16 +2,17 @@ package main
 
 import (
 	"hw-1/services"
-	"hw-1/storage/json_storage"
+	"hw-1/storage"
 	"time"
 )
 
 func main() {
-	store, err := json_storage.New("data.json")
+	store, err := storage.NewJsonStorage("data.json")
 	if err != nil {
 		panic(err)
 	}
 
-	service := services.New(store)
-	service.AcceptOrder(3, 3, time.Now().Add(time.Hour))
+	var service services.OrderServiceInterface = services.New(store)
+
+	service.AcceptOrder(10, 15, time.Now().Add(time.Hour))
 }

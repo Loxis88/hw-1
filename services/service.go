@@ -9,13 +9,12 @@ import (
 )
 
 type OrderServiceInterface interface {
-	CreateOrder(order models.Order) error
-	UpdateOrder(order models.Order) error
-	DeleteOrder(id uint) error
-	GetOrders() []models.Order
-	GetOrdersByCustomer(customerID uint, lastN int, inStorageOnly bool) []models.Order
-	FindOrder(id uint) (*models.Order, error)
-	GetExpiredOrders() []models.Order
+	// Основные операции с заказами
+	AcceptOrder(orderID uint, customerID uint, storageDate time.Time) error
+	ReturnOrderToCourier(orderID uint) error
+	DeliverOrders(customerID uint, orderIDs ...uint) error
+	AcceptReturns(customerID uint, orderIDs ...uint) error
+	GetCustomerOrders(customerID uint, limit int, inStorageOnly bool) ([]models.Order, error)
 }
 
 // Проверка реализации интерфейса
