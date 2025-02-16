@@ -7,7 +7,7 @@ import (
 	"hw-1/services"
 )
 
-// handleListOrders processes the list-orders command
+// HandleListOrders processes the list-orders command
 func HandleListOrders(service services.OrderServiceInterface) {
 	customerID := flag.Uint("client-id", 0, "clientID")
 	limit := flag.Int("limit", 0, "limit")

@@ -7,7 +7,7 @@ import (
 	"hw-1/services"
 )
 
-// handleReturnOrder processes the return-order command
+// HandleReturnOrder processes the return-order command
 func HandleReturnOrder(service services.OrderServiceInterface) {
 	var orderID = flag.Uint("order-id", 0, "orderID")
 	flag.Parse()

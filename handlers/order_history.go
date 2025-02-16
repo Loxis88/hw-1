@@ -7,7 +7,7 @@ import (
 	"hw-1/services"
 )
 
-// handleOrderHistory processes the order-history command
+// HandleOrderHistory processes the order-history command
 func HandleOrderHistory(service services.OrderServiceInterface) {
 	customerID := flag.Int("client-id", 0, "clientID")
 	flag.Parse()
