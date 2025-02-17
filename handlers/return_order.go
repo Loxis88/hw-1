@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"flag"
 	"fmt"
 
 	"hw-1/services"
@@ -9,10 +8,11 @@ import (
 
 // HandleReturnOrder processes the return-order command
 func HandleReturnOrder(service services.OrderServiceInterface) {
-	var orderID = flag.Uint("order-id", 0, "orderID")
-	flag.Parse()
+	flagSet := NewFlagSet()
+	orderID := flagSet.Uint("order-id", 0, "orderID")
+	flagSet.Parse()
 
-	if flag.NFlag() != 1 || *orderID == 0 {
+	if flagSet.NFlag() != 1 || *orderID == 0 {
 		fmt.Println("Invalid arguments")
 		return
 	}

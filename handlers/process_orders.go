@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"flag"
 	"fmt"
 	"strconv"
 	"strings"
@@ -11,12 +10,13 @@ import (
 
 // HandleProcessOrders processes the process-orders command
 func HandleProcessOrders(service services.OrderServiceInterface) {
-	clientID := flag.Uint("client-id", 0, "clientID")
-	orderIDs := flag.String("order-ids", "", "orderIDs")
-	action := flag.String("action", "", "action")
-	flag.Parse()
+	flagSet := NewFlagSet()
+	clientID := flagSet.Uint("client-id", 0, "clientID")
+	orderIDs := flagSet.String("order-ids", "", "orderIDs")
+	action := flagSet.String("action", "", "action")
+	flagSet.Parse()
 
-	if flag.NFlag() < 3 {
+	if flagSet.NFlag() < 3 {
 		fmt.Println("Invalid arguments")
 		return
 	}

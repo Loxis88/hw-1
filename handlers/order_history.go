@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"flag"
 	"fmt"
 
 	"hw-1/services"
@@ -9,8 +8,9 @@ import (
 
 // HandleOrderHistory processes the order-history command
 func HandleOrderHistory(service services.OrderServiceInterface) {
-	customerID := flag.Int("client-id", 0, "clientID")
-	flag.Parse()
+	flagSet := NewFlagSet()
+	customerID := flagSet.Int("client-id", 0, "clientID")
+	flagSet.Parse()
 
 	if *customerID == 0 {
 		fmt.Println("Invalid client ID")
