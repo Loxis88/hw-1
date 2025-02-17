@@ -35,27 +35,33 @@ func main() {
 		return
 
 	case AcceptOrderCommand:
-		handlers.HandleAcceptOrder(service)
+		flagSet := handlers.NewFlagSet()
+		handlers.HandleAcceptOrder(service, flagSet)
 		return
 
 	case ReturnOrderCommand:
-		handlers.HandleReturnOrder(service)
+		flagSet := handlers.NewFlagSet()
+		handlers.HandleReturnOrder(service, flagSet)
 		return
 
 	case ProcessOrdersCommand:
-		handlers.HandleProcessOrders(service)
+		flagSet := handlers.NewFlagSet()
+		handlers.HandleProcessOrders(service, flagSet)
 		return
 
 	case ListOrdersCommand:
-		handlers.HandleListOrders(service)
+		flagSet := handlers.NewFlagSet()
+		handlers.HandleListOrders(service, flagSet)
 		return
 
 	case ListReturnsCommand:
-		handlers.HandleListReturns(service)
+		flagSet := handlers.NewFlagSet()
+		handlers.HandleListReturns(service, flagSet)
 		return
 
 	case OrderHistoryCommand:
-		handlers.HandleOrderHistory(service)
+		flagSet := handlers.NewFlagSet()
+		handlers.HandleOrderHistory(service, flagSet)
 		return
 
 	default:
