@@ -35,20 +35,13 @@ func New(storage storage.OrderStorage) OrderServiceInterface {
 
 // Принять заказ от курьера
 func (s *OrderService) AcceptOrder(orderID uint, customerID uint, storageDate time.Time) error {
-	// получаем список заказов покупателя
-	orders, err := s.GetCustomerOrders(customerID, 0)
-	if err != nil {
-		return err
+	// Проверка что этот заказ не был уже принят
+	order, err := s.storage.FindOrder(orderID)
+	_ = err
+	if order != nil {
+		return models.ErrOrderAlreadyExists
 	}
 
-	// Проверка что этот заказ не был уже принят
-	if len(orders) != 0 {
-		for _, find := range orders {
-			if find.ID == orderID {
-				return models.ErrOrderAlreadyExists
-			}
-		}
-	}
 	// валидация времени хранения заказа
 	if storageDate.Before(time.Now()) {
 		return models.ErrInvalidStorageDate
@@ -161,7 +154,10 @@ func (s *OrderService) AcceptReturns(customerID uint, orderIDs ...uint) error {
 			return err
 		}
 
-		if err := s.updateOrderStatus(order, models.StatusReturned); err != nil {
+		order.UpdatedAt = time.Now()
+		order.Status = models.StatusReturned
+
+		if err := s.storage.UpdateOrder(*order); err != nil {
 			return err
 		}
 	}

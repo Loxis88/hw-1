@@ -1,42 +1,42 @@
 [
     {
-        "id": 13,
-        "customer_id": 456,
-        "storage_until": "2025-02-25T14:24:51.15890205+03:00",
-        "status": "new",
-        "delivered_at": "0001-01-01T00:00:00Z",
-        "updated_at": "2025-02-18T14:24:51.158908812+03:00"
-    },
-    {
         "id": 1,
         "customer_id": 123,
         "storage_until": "2023-12-01T12:00:00Z",
-        "status": "new",
+        "status": "returned",
         "delivered_at": "0001-01-01T00:00:00Z",
-        "updated_at": "2023-10-04T10:00:00Z"
+        "updated_at": "2025-02-18T15:18:42.336856595+03:00"
     },
     {
         "id": 2,
         "customer_id": 456,
         "storage_until": "2023-12-05T15:30:00Z",
-        "status": "new",
+        "status": "expired",
         "delivered_at": "2023-10-05T09:45:00Z",
-        "updated_at": "2023-10-05T09:45:00Z"
+        "updated_at": "2025-02-18T15:18:42.336856595+03:00"
     },
     {
         "id": 3,
         "customer_id": 789,
         "storage_until": "2023-12-10T18:00:00Z",
-        "status": "new",
+        "status": "expired",
         "delivered_at": "0001-01-01T00:00:00Z",
-        "updated_at": "2023-10-06T14:20:00Z"
+        "updated_at": "2025-02-18T15:18:42.336856595+03:00"
     },
     {
         "id": 13,
-        "customer_id": 123,
-        "storage_until": "2025-02-25T14:49:22.734724784+03:00",
+        "customer_id": 124,
+        "storage_until": "2025-02-25T18:56:26.386061119+03:00",
         "status": "new",
         "delivered_at": "0001-01-01T00:00:00Z",
-        "updated_at": "2025-02-18T14:49:22.734725337+03:00"
+        "updated_at": "2025-02-18T18:56:26.386065722+03:00"
+    },
+    {
+        "id": 123,
+        "customer_id": 123,
+        "storage_until": "2025-02-25T18:56:54.330261848+03:00",
+        "status": "new",
+        "delivered_at": "0001-01-01T00:00:00Z",
+        "updated_at": "2025-02-18T18:56:54.330269144+03:00"
     }
 ]

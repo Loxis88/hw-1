@@ -26,5 +26,8 @@ func HandleListOrders(service services.OrderServiceInterface) {
 		fmt.Println("Error listing orders:", err)
 		return
 	}
-	fmt.Println("Orders:", orders)
+	fmt.Println("Orders:")
+	for _, order := range orders {
+		fmt.Print(order)
+	}
 }

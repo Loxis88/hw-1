@@ -38,31 +38,24 @@ func main() {
 	switch mainArg {
 	case HelpCommand:
 		fmt.Println(helpMessage)
-		return
 
 	case AcceptOrderCommand:
 		handlers.HandleAcceptOrder(service)
-		return
 
 	case ReturnOrderCommand:
 		handlers.HandleReturnOrder(service)
-		return
 
 	case ProcessOrdersCommand:
 		handlers.HandleProcessOrders(service)
-		return
 
 	case ListOrdersCommand:
 		handlers.HandleListOrders(service)
-		return
 
 	case ListReturnsCommand:
 		handlers.HandleListReturns(service)
-		return
 
 	case OrderHistoryCommand:
 		handlers.HandleOrderHistory(service)
-		return
 
 	default:
 		fmt.Println("Invalid command")

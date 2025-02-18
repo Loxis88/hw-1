@@ -32,10 +32,13 @@ func New(path string) (*Storage, error) {
 		return nil, fmt.Errorf("failed to unmarshal orders: %w", err)
 	}
 
-	return &Storage{
+	storage := &Storage{
 		orders: orders,
 		path:   path,
-	}, nil
+	}
+
+	storage.ValidateOrders()
+	return storage, nil
 }
 
 func (s *Storage) save() error {
@@ -51,6 +54,17 @@ func (s *Storage) save() error {
 		return fmt.Errorf("failed to encode orders: %w", err)
 	}
 	return nil
+}
+
+func (s *Storage) ValidateOrders() {
+	now := time.Now()
+	for i, order := range s.orders {
+		if order.Status == models.StatusNew && now.After(order.StorageUntil) {
+			s.orders[i].Status = models.StatusExpired
+			s.orders[i].UpdatedAt = now
+		}
+	}
+	s.save()
 }
 
 // AddOrder adds a new order to the storage
@@ -101,9 +115,6 @@ func (s *Storage) GetOrdersByCustomer(customerID uint, lastN int) []models.Order
 
 	for _, order := range s.orders {
 		if order.CustomerID == customerID {
-			if order.Status != models.StatusNew {
-				continue
-			}
 			result = append(result, order)
 		}
 	}
