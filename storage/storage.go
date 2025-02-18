@@ -17,7 +17,6 @@ type OrderStorage interface {
 	GetReturnedOrders() []models.Order
 }
 
-// Функция для создания нового хранилища
 func NewJsonStorage(path string) (OrderStorage, error) {
 	return json_storage.New(path)
 }

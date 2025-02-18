@@ -9,7 +9,9 @@ import (
 
 // HandleOrderHistory processes the order-history command
 func HandleOrderHistory(service services.OrderServiceInterface) {
-	customerID := flag.Int("client-id", 0, "clientID")
+	flagSet := flag.NewFlagSet("order-history", flag.ExitOnError)
+
+	customerID := flagSet.Int("client-id", 0, "clientID")
 	flag.Parse()
 
 	if *customerID == 0 {

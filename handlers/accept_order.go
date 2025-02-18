@@ -3,6 +3,7 @@ package handlers
 import (
 	"flag"
 	"fmt"
+	"os"
 	"time"
 
 	"hw-1/services"
@@ -10,13 +11,15 @@ import (
 
 // HandleAcceptOrder processes the accept-order command
 func HandleAcceptOrder(service services.OrderServiceInterface) {
-	orderID := flag.Uint("order-id", 0, "orderID")
-	receiverID := flag.Uint("receiver-id", 0, "receiverID")
-	storageDuration := flag.Uint("storage-duration", 0, "duration")
+	flagSet := flag.NewFlagSet("accept-order", flag.ExitOnError)
 
-	flag.Parse()
+	orderID := flagSet.Uint("order-id", 0, "orderID")
+	receiverID := flagSet.Uint("receiver-id", 0, "receiverID")
+	storageDuration := flagSet.Uint("storage-duration", 0, "duration")
 
-	if flag.NFlag() != 3 || *orderID == 0 || *receiverID == 0 || *storageDuration == 0 {
+	flagSet.Parse(os.Args[2:])
+
+	if flagSet.NFlag() != 3 || *orderID == 0 || *receiverID == 0 || *storageDuration == 0 {
 		fmt.Println("Invalid arguments")
 		return
 	}

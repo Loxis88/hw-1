@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"hw-1/handlers"
 	"hw-1/services"
 	"hw-1/storage"
-	"os"
 )
 
 type command string
@@ -27,6 +28,11 @@ func main() {
 	}
 
 	var service services.OrderServiceInterface = services.New(store)
+	if len(os.Args) < 2 {
+		fmt.Println("No command provided")
+		fmt.Println(helpMessage)
+		return
+	}
 	mainArg := command(os.Args[1])
 
 	switch mainArg {
