@@ -26,6 +26,7 @@ func HandleAcceptOrder(service services.OrderServiceInterface) {
 
 	if err := service.AcceptOrder(*orderID, *receiverID, time.Now().Add(time.Duration(*storageDuration)*time.Hour*24)); err != nil {
 		fmt.Println("Error accepting order:", err)
+		return
 	}
 
 	fmt.Println("Order accepted successfully")

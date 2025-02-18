@@ -55,10 +55,6 @@ func (s *Storage) save() error {
 
 // AddOrder adds a new order to the storage
 func (s *Storage) AddOrder(order models.Order) error {
-	if _, err := s.FindOrder(order.ID); err == nil {
-		return fmt.Errorf("order with id %d already exists", order.ID)
-	}
-
 	s.orders = append(s.orders, order)
 	if err := s.save(); err != nil {
 		return fmt.Errorf("failed to save order: %w", err)

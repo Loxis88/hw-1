@@ -35,10 +35,21 @@ func New(storage storage.OrderStorage) OrderServiceInterface {
 
 // Принять заказ от курьера
 func (s *OrderService) AcceptOrder(orderID uint, customerID uint, storageDate time.Time) error {
-	if find, _ := s.storage.FindOrder(orderID); find != nil {
-		return models.ErrOrderAlreadyExists
+	// получаем список заказов покупателя
+	orders, err := s.GetCustomerOrders(customerID, 0)
+	if err != nil {
+		return err
 	}
 
+	// Проверка что этот заказ не был уже принят
+	if len(orders) != 0 {
+		for _, find := range orders {
+			if find.ID == orderID {
+				return models.ErrOrderAlreadyExists
+			}
+		}
+	}
+	// валидация времени хранения заказа
 	if storageDate.Before(time.Now()) {
 		return models.ErrInvalidStorageDate
 	}
