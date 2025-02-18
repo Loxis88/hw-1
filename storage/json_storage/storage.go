@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"sort"
 	"time"
 
 	"hw-1/models"
@@ -109,23 +108,6 @@ func (s *Storage) GetOrders() []models.Order {
 	return s.orders
 }
 
-// GetOrdersByCustomer retrieves orders for a specific customer
-func (s *Storage) GetOrdersByCustomer(customerID uint, lastN int) []models.Order {
-	var result []models.Order
-
-	for _, order := range s.orders {
-		if order.CustomerID == customerID {
-			result = append(result, order)
-		}
-	}
-
-	if lastN > 0 && len(result) > lastN {
-		return result[len(result)-lastN:]
-	}
-
-	return result
-}
-
 // FindOrder finds an order by its ID
 func (s *Storage) FindOrder(id uint) (*models.Order, error) {
 	for i, order := range s.orders {
@@ -161,19 +143,4 @@ func (s *Storage) GetReturnedOrders() []models.Order {
 		}
 	}
 	return result
-}
-
-// GetOrdersHistory retrieves the order history
-func (s *Storage) GetOrdersHistory(limit int) ([]models.Order, error) {
-	orders := s.GetOrders()
-
-	sort.Slice(orders, func(i, j int) bool {
-		return orders[i].UpdatedAt.After(orders[j].UpdatedAt)
-	})
-
-	if len(orders) > limit {
-		orders = orders[:limit]
-	}
-
-	return orders, nil
 }

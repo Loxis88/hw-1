@@ -13,5 +13,8 @@ func HandleListReturns(service services.OrderServiceInterface) {
 		fmt.Println("Error listing returns:", err)
 		return
 	}
-	fmt.Println("Returns:", returns)
+	fmt.Println("Returns")
+	for _, order := range returns {
+		fmt.Print(order)
+	}
 }

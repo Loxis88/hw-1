@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"sort"
 	"time"
 
 	"hw-1/models"
@@ -65,7 +66,7 @@ func (s *OrderService) ReturnOrderToCourier(orderID uint) error {
 		return err
 	}
 
-	if order.Status == models.StatusNew {
+	if order.Status == models.StatusNew || order.Status == models.StatusDelivered {
 		return models.ErrOrderCannotBeReturned
 	}
 
@@ -84,8 +85,8 @@ func (s *OrderService) DeliverOrders(customerID uint, orderIDs ...uint) error {
 			return err
 		}
 
-		if order.CustomerID != customerID {
-			return fmt.Errorf("%w : %d", models.ErrOrderNotBelongToCustomer, id)
+		if err := s.isOrderBelongsToCustomer(order, customerID); err != nil {
+			return err
 		}
 
 		if order.Status != models.StatusNew {
@@ -167,12 +168,44 @@ func (s *OrderService) AcceptReturns(customerID uint, orderIDs ...uint) error {
 
 // GetCustomerOrders retrieves orders for a specific customer
 func (s *OrderService) GetCustomerOrders(customerID uint, limit int) ([]models.Order, error) {
-	return s.storage.GetOrdersByCustomer(customerID, limit), nil
+	orders := s.storage.GetOrders()
+	customerOrders := []models.Order{}
+
+	if len(orders) == 0 {
+		return nil, fmt.Errorf("Customer %d has no orders", customerID)
+	}
+
+	for _, order := range orders {
+		if order.CustomerID == customerID {
+			customerOrders = append(customerOrders, order)
+		}
+	}
+
+	if limit > 0 && limit <= len(customerOrders) {
+		return customerOrders[:limit], nil
+	}
+
+	return customerOrders, nil
 }
 
 // GetOrderHistory retrieves the order history
 func (s *OrderService) GetOrderHistory(limit int) ([]models.Order, error) {
-	return s.storage.GetOrdersHistory(limit)
+	orders := s.storage.GetOrders()
+	if len(orders) == 0 {
+		return nil, fmt.Errorf("Нет заказов")
+	}
+
+	// Сортируем заказы по UpdatedAt (от новых к старым)
+	sort.Slice(orders, func(i, j int) bool {
+		return orders[i].UpdatedAt.After(orders[j].UpdatedAt)
+	})
+
+	// Применяем лимит, если он задан
+	if limit > 0 && limit < len(orders) {
+		orders = orders[:limit]
+	}
+
+	return orders, nil
 }
 
 // GetReturnedOrders retrieves the returned orders

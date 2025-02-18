@@ -17,7 +17,11 @@ func HandleProcessOrders(service services.OrderServiceInterface) {
 	clientID := flagSet.Uint("client-id", 0, "clientID")
 	orderIDs := flagSet.String("order-ids", "", "orderIDs")
 	action := flagSet.String("action", "", "action")
-	flagSet.Parse(os.Args[2:])
+
+	if err := flagSet.Parse(os.Args[2:]); err != nil {
+		fmt.Printf("%v", err)
+		return
+	}
 
 	if flagSet.NFlag() < 3 {
 		fmt.Println("Invalid arguments")

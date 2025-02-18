@@ -12,7 +12,10 @@ import (
 func HandleReturnOrder(service services.OrderServiceInterface) {
 	flagSet := flag.NewFlagSet("return-order", flag.ExitOnError)
 	var orderID = flagSet.Uint("order-id", 0, "orderID")
-	flagSet.Parse(os.Args[2:])
+	if err := flagSet.Parse(os.Args[2:]); err != nil {
+		fmt.Errorf("%w", err)
+		return
+	}
 
 	if flagSet.NFlag() != 1 || *orderID == 0 {
 		fmt.Println("Invalid arguments")

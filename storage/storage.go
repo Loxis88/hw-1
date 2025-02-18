@@ -10,10 +10,8 @@ type OrderStorage interface {
 	UpdateOrder(order models.Order) error
 	DeleteOrder(id uint) error
 	GetOrders() []models.Order
-	GetOrdersByCustomer(customerID uint, lastN int) []models.Order
 	FindOrder(id uint) (*models.Order, error)
 	GetExpiredOrders() []models.Order
-	GetOrdersHistory(limit int) ([]models.Order, error)
 	GetReturnedOrders() []models.Order
 }
 
