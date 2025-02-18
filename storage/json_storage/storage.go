@@ -117,30 +117,3 @@ func (s *Storage) FindOrder(id uint) (*models.Order, error) {
 	}
 	return nil, fmt.Errorf("order with id %d not found", id)
 }
-
-// GetExpiredOrders retrieves orders that have expired
-func (s *Storage) GetExpiredOrders() []models.Order {
-	var expired []models.Order
-	now := time.Now()
-
-	for _, order := range s.orders {
-		if order.Status == models.StatusNew && now.After(order.StorageUntil) {
-			expired = append(expired, order)
-		}
-	}
-
-	return expired
-}
-
-// GetReturnedOrders retrieves orders that have been returned
-func (s *Storage) GetReturnedOrders() []models.Order {
-	orders := s.GetOrders()
-
-	var result []models.Order
-	for _, order := range orders {
-		if order.Status == models.StatusReturned {
-			result = append(result, order)
-		}
-	}
-	return result
-}

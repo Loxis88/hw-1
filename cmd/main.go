@@ -95,12 +95,11 @@ const helpMessage = `Доступные команды:
      process-orders --client-id 456 --order-ids 123,789 --action issue
 
 4. Получить список заказов
-   Команда: list-orders --client-id <ID> [--limit <N>] [--status <STATUS>]
+   Команда: list-orders --client-id <ID> [--limit <N>]
    Описание: Возвращает список заказов для указанного клиента.
    Аргументы:
      --client-id         Идентификатор клиента (обязательный).
      --limit             Ограничить количество заказов (опционально).
-     --status            Фильтр по статусу заказа (например, "in_storage") (опционально).
    Пример:
      list-orders --client-id 456 --limit 10 --status in_storage
 

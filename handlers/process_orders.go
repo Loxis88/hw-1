@@ -35,7 +35,7 @@ func HandleProcessOrders(service services.OrderServiceInterface) {
 	orders := strings.Split(*orderIDs, ",")
 	var ids []uint = make([]uint, len(orders))
 
-	for i, _ := range orders {
+	for i := range len(orders) {
 		id, err := strconv.Atoi(orders[i])
 		if err != nil {
 			fmt.Println("Invalid order ID:", orders[i])

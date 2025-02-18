@@ -208,18 +208,14 @@ func (s *OrderService) GetOrderHistory(limit int) ([]models.Order, error) {
 	return orders, nil
 }
 
-// GetReturnedOrders retrieves the returned orders
 func (s *OrderService) GetReturnedOrders() ([]models.Order, error) {
-	return s.storage.GetReturnedOrders(), nil
-}
-
-// ReturnedList prints the list of returned orders
-func (s *OrderService) ReturnedList() {
-	orders := s.storage.GetExpiredOrders()
+	orders := s.storage.GetOrders()
+	returnedOrders := []models.Order{}
 
 	for _, order := range orders {
 		if order.Status == models.StatusReturned {
-			fmt.Println(order)
+			returnedOrders = append(returnedOrders, order)
 		}
 	}
+	return returnedOrders, nil
 }

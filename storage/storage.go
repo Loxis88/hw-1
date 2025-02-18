@@ -11,8 +11,6 @@ type OrderStorage interface {
 	DeleteOrder(id uint) error
 	GetOrders() []models.Order
 	FindOrder(id uint) (*models.Order, error)
-	GetExpiredOrders() []models.Order
-	GetReturnedOrders() []models.Order
 }
 
 func NewJsonStorage(path string) (OrderStorage, error) {
