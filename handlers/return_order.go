@@ -8,11 +8,10 @@ import (
 	"hw-1/services"
 )
 
-// HandleReturnOrder processes the return-order command
 func HandleReturnOrder(service services.OrderServiceInterface) {
 	flagSet := flag.NewFlagSet("return-order", flag.ExitOnError)
 	var orderID = flagSet.Uint("order-id", 0, "orderID")
-	if err := flagSet.Parse(os.Args[2:]); err != nil {
+	if err := flagSet.Parse(os.Args[1:]); err != nil {
 		fmt.Errorf("%w", err)
 		return
 	}

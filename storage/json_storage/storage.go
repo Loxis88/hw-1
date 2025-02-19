@@ -68,6 +68,10 @@ func (s *Storage) ValidateOrders() {
 
 // AddOrder adds a new order to the storage
 func (s *Storage) AddOrder(order models.Order) error {
+	order.UpdatedAt = time.Now()
+	if order.Status == "" {
+		order.Status = models.StatusNew
+	}
 	s.orders = append(s.orders, order)
 	if err := s.save(); err != nil {
 		return fmt.Errorf("failed to save order: %w", err)

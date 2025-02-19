@@ -8,12 +8,11 @@ import (
 	"hw-1/services"
 )
 
-// HandleOrderHistory processes the order-history command
 func HandleOrderHistory(service services.OrderServiceInterface) {
 	flagSet := flag.NewFlagSet("order-history", flag.ExitOnError)
 
 	limit := flagSet.Int("limit", 0, "limit")
-	if err := flagSet.Parse(os.Args[2:]); err != nil {
+	if err := flagSet.Parse(os.Args[1:]); err != nil {
 		fmt.Printf("%v", err)
 		return
 	}

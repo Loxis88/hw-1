@@ -9,19 +9,23 @@ import (
 )
 
 func HandleImportOrders(service services.OrderServiceInterface) {
-	flagSet := flag.NewFlagSet("path", flag.ExitOnError)
+	flagSet := flag.NewFlagSet("import", flag.ContinueOnError)
 
-	path := flagSet.String("path", "", "path")
+	path := flagSet.String("path", "", "path to json orders")
 
-	flagSet.Parse(os.Args)
+	if err := flagSet.Parse(os.Args[1:]); err != nil {
+		fmt.Printf("%v", err)
+		return
+	}
 
-	fmt.Println(*path)
 	if *path == "" {
-		fmt.Println("error while parsin arguments")
+		return
 	}
 
-	err := service.ImportOrders(*path)
-	if err != nil {
-		fmt.Print(err)
+	if err := service.ImportOrders(*path); err != nil {
+		fmt.Printf("Ошибка при импорте: %v\n", err)
+		return
 	}
+
+	fmt.Println("Заказы успешно импортированы")
 }

@@ -240,6 +240,7 @@ func (s *OrderService) GetReturnedOrders(page, pageSize int) ([]models.Order, er
 	return returnedOrders[startIndex:endIndex], nil
 }
 
+// импорт выполняется атомарно либо все заказы возможно принять и они добавляются либо ни один заказ не добавляется
 func (s OrderService) ImportOrders(path string) error {
 	var orders []models.Order
 	data, err := os.ReadFile(path)
@@ -250,8 +251,20 @@ func (s OrderService) ImportOrders(path string) error {
 	if err := json.Unmarshal(data, &orders); err != nil {
 		return fmt.Errorf("failed to unmarshal orders: %w", err)
 	}
+
 	for _, order := range orders {
-		fmt.Println(order)
+		if _, err := s.storage.FindOrder(order.ID); err == nil {
+			return fmt.Errorf("заказ %vуже принят, импорт отклонен", fmt.Sprint(order))
+		}
+
+		if time.Now().After(order.StorageUntil) {
+			return fmt.Errorf("заказ %vнеккоректен, импорт отклонен", fmt.Sprint(order))
+		}
 	}
+
+	for _, order := range orders {
+		s.storage.AddOrder(order)
+	}
+
 	return nil
 }

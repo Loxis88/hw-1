@@ -10,7 +10,6 @@ import (
 	"hw-1/services"
 )
 
-// HandleProcessOrders processes the process-orders command
 func HandleProcessOrders(service services.OrderServiceInterface) {
 	flagSet := flag.NewFlagSet("process-orders", flag.ExitOnError)
 
@@ -18,7 +17,7 @@ func HandleProcessOrders(service services.OrderServiceInterface) {
 	orderIDs := flagSet.String("order-ids", "", "orderIDs")
 	action := flagSet.String("action", "", "action")
 
-	if err := flagSet.Parse(os.Args[2:]); err != nil {
+	if err := flagSet.Parse(os.Args[1:]); err != nil {
 		fmt.Printf("%v", err)
 		return
 	}
