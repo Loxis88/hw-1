@@ -47,11 +47,10 @@ func main() {
 			continue
 		}
 
-		// Разбиваем ввод на аргументы
 		args := strings.Fields(input)
 		mainArg := command(args[0])
 
-		// Обновляем os.Args для совместимости с существующими обработчиками
+		// замена os.Args на инпут
 		os.Args = args
 
 		switch mainArg {

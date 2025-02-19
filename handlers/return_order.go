@@ -9,7 +9,7 @@ import (
 )
 
 func HandleReturnOrder(service services.OrderServiceInterface) {
-	flagSet := flag.NewFlagSet("return-order", flag.ExitOnError)
+	flagSet := flag.NewFlagSet("return-order", flag.ContinueOnError)
 	var orderID = flagSet.Uint("order-id", 0, "orderID")
 	if err := flagSet.Parse(os.Args[1:]); err != nil {
 		fmt.Printf("Error parsing flags: %v\n", err)

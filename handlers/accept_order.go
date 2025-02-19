@@ -10,7 +10,7 @@ import (
 )
 
 func HandleAcceptOrder(service services.OrderServiceInterface) {
-	flagSet := flag.NewFlagSet("accept-order", flag.ExitOnError)
+	flagSet := flag.NewFlagSet("accept-order", flag.ContinueOnError)
 
 	orderID := flagSet.Uint("order-id", 0, "orderID")
 	receiverID := flagSet.Uint("receiver-id", 0, "receiverID")
@@ -22,7 +22,7 @@ func HandleAcceptOrder(service services.OrderServiceInterface) {
 	}
 
 	if flagSet.NFlag() != 3 || *orderID == 0 || *receiverID == 0 || *storageDuration == 0 {
-		fmt.Println("Invalid arguments")
+		fmt.Println("Invalid arguments", *orderID, *receiverID, *storageDuration)
 		return
 	}
 

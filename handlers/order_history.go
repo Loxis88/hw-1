@@ -9,7 +9,7 @@ import (
 )
 
 func HandleOrderHistory(service services.OrderServiceInterface) {
-	flagSet := flag.NewFlagSet("order-history", flag.ExitOnError)
+	flagSet := flag.NewFlagSet("order-history", flag.ContinueOnError)
 
 	limit := flagSet.Int("limit", 0, "limit")
 	if err := flagSet.Parse(os.Args[1:]); err != nil {

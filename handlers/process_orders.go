@@ -11,7 +11,7 @@ import (
 )
 
 func HandleProcessOrders(service services.OrderServiceInterface) {
-	flagSet := flag.NewFlagSet("process-orders", flag.ExitOnError)
+	flagSet := flag.NewFlagSet("process-orders", flag.ContinueOnError)
 
 	clientID := flagSet.Uint("client-id", 0, "clientID")
 	orderIDs := flagSet.String("order-ids", "", "orderIDs")
@@ -45,14 +45,14 @@ func HandleProcessOrders(service services.OrderServiceInterface) {
 	switch *action {
 	case "return":
 		if err := service.AcceptReturns(*clientID, ids...); err != nil {
-			fmt.Println("Error accepting orders:", err)
+			fmt.Println("Error returning orders:", err)
 			return
 		}
-		fmt.Println("Заказы успешно приняты")
+		fmt.Println("Заказы успешно возвращены")
 		return
 	case "issue":
 		if err := service.DeliverOrders(*clientID, ids...); err != nil {
-			fmt.Println("Error returning orders:", err)
+			fmt.Println("Error issueing orders:", err)
 			return
 		}
 		fmt.Println("Заказы успешно выданы")

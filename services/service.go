@@ -25,22 +25,17 @@ type OrderServiceInterface interface {
 // Проверка реализации интерфейса
 var _ OrderServiceInterface = (*OrderService)(nil)
 
-// OrderService implements the OrderServiceInterface
 type OrderService struct {
 	storage storage.OrderStorage
 }
 
-// New creates a new instance of OrderService
 func New(storage storage.OrderStorage) OrderServiceInterface {
 	return &OrderService{storage: storage}
 }
 
 // Принять заказ от курьера
 func (s *OrderService) AcceptOrder(orderID uint, customerID uint, storageDate time.Time) error {
-	order, err := s.storage.FindOrder(orderID)
-	if err != nil {
-		return err
-	}
+	order, _ := s.storage.FindOrder(orderID)
 	if order != nil {
 		return models.ErrOrderAlreadyExists
 	}
@@ -95,7 +90,7 @@ func (s *OrderService) DeliverOrders(customerID uint, orderIDs ...uint) error {
 		}
 
 		order.Status = models.StatusDelivered
-		order.UpdatedAt = time.Now()
+		order.UpdatedAt, order.DeliveredAt = time.Now(), time.Now()
 		if err := s.storage.UpdateOrder(*order); err != nil {
 			return err
 		}
@@ -104,7 +99,6 @@ func (s *OrderService) DeliverOrders(customerID uint, orderIDs ...uint) error {
 	return nil
 }
 
-// Helper function to check if order belongs to customer
 func (s *OrderService) isOrderBelongsToCustomer(order *models.Order, customerID uint) error {
 	if order.CustomerID != customerID {
 		return fmt.Errorf("%w : %d", models.ErrOrderNotBelongToCustomer, order.ID)
@@ -112,15 +106,13 @@ func (s *OrderService) isOrderBelongsToCustomer(order *models.Order, customerID 
 	return nil
 }
 
-// Helper function to check if order can be returned
 func (s *OrderService) canOrderBeReturned(order *models.Order) error {
-	if order.Status != models.StatusDelivered {
+	if order.Status != models.StatusDelivered || time.Now().Sub(order.DeliveredAt) > 48*time.Hour {
 		return models.ErrOrderCannotBeReturned
 	}
 	return nil
 }
 
-// Helper function to check if order can be delivered
 func (s *OrderService) canOrderBeDelivered(order *models.Order) error {
 	if order.Status != models.StatusNew {
 		return models.ErrOrderCannotBeDelivered
@@ -128,14 +120,12 @@ func (s *OrderService) canOrderBeDelivered(order *models.Order) error {
 	return nil
 }
 
-// Helper function to update order status
 func (s *OrderService) updateOrderStatus(order *models.Order, status models.OrderStatus) error {
 	order.Status = status
 	order.UpdatedAt = time.Now()
 	return s.storage.UpdateOrder(*order)
 }
 
-// Helper function to delete order
 func (s *OrderService) deleteOrder(orderID uint) error {
 	return s.storage.DeleteOrder(orderID)
 }
@@ -155,11 +145,10 @@ func (s *OrderService) AcceptReturns(customerID uint, orderIDs ...uint) error {
 		if err := s.canOrderBeReturned(order); err != nil {
 			return err
 		}
-
-		order.UpdatedAt = time.Now()
-		order.Status = models.StatusReturned
-
-		if err := s.storage.UpdateOrder(*order); err != nil {
+	}
+	for _, id := range orderIDs {
+		order, _ := s.storage.FindOrder(id)
+		if err := s.updateOrderStatus(order, models.StatusReturned); err != nil {
 			return err
 		}
 	}
@@ -167,7 +156,6 @@ func (s *OrderService) AcceptReturns(customerID uint, orderIDs ...uint) error {
 	return nil
 }
 
-// GetCustomerOrders retrieves orders for a specific customer
 func (s *OrderService) GetCustomerOrders(customerID uint, limit int) ([]models.Order, error) {
 	orders := s.storage.GetOrders()
 	customerOrders := []models.Order{}
@@ -189,7 +177,6 @@ func (s *OrderService) GetCustomerOrders(customerID uint, limit int) ([]models.O
 	return customerOrders, nil
 }
 
-// GetOrderHistory retrieves the order history
 func (s *OrderService) GetOrderHistory(limit int) ([]models.Order, error) {
 	orders := s.storage.GetOrders()
 	if len(orders) == 0 {
@@ -201,7 +188,6 @@ func (s *OrderService) GetOrderHistory(limit int) ([]models.Order, error) {
 		return orders[i].UpdatedAt.After(orders[j].UpdatedAt)
 	})
 
-	// Применяем лимит, если он задан
 	if limit > 0 && limit < len(orders) {
 		orders = orders[:limit]
 	}
@@ -240,7 +226,7 @@ func (s *OrderService) GetReturnedOrders(page, pageSize int) ([]models.Order, er
 	return returnedOrders[startIndex:endIndex], nil
 }
 
-// импорт выполняется атомарно либо все заказы возможно принять и они добавляются либо ни один заказ не добавляется
+// либо все заказы возможно принять и они добавляются либо ни один заказ не добавляется
 func (s OrderService) ImportOrders(path string) error {
 	var orders []models.Order
 	data, err := os.ReadFile(path)

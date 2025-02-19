@@ -9,7 +9,7 @@ import (
 )
 
 func HandleListOrders(service services.OrderServiceInterface) {
-	flagSet := flag.NewFlagSet("list-orders", flag.ExitOnError)
+	flagSet := flag.NewFlagSet("list-orders", flag.ContinueOnError)
 
 	customerID := flagSet.Uint("client-id", 0, "clientID")
 	limit := flagSet.Int("limit", 0, "limit")

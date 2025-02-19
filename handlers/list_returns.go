@@ -9,7 +9,7 @@ import (
 )
 
 func HandleListReturns(service services.OrderServiceInterface) {
-	flagSet := flag.NewFlagSet("list-returns", flag.ExitOnError)
+	flagSet := flag.NewFlagSet("list-returns", flag.ContinueOnError)
 
 	page := flagSet.Int("page", 1, "page")
 	perPage := flagSet.Int("per-page", 10, "per-page")
