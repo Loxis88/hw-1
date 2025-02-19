@@ -9,16 +9,14 @@ import (
 	"hw-1/storage"
 )
 
-// OrderServiceInterface defines the interface for order service operations
 type OrderServiceInterface interface {
-	// Основные операции с заказами
 	AcceptOrder(orderID uint, customerID uint, storageDate time.Time) error
 	ReturnOrderToCourier(orderID uint) error
 	DeliverOrders(customerID uint, orderIDs ...uint) error
 	AcceptReturns(customerID uint, orderIDs ...uint) error
 	GetCustomerOrders(customerID uint, limit int) ([]models.Order, error)
 	GetOrderHistory(limit int) ([]models.Order, error)
-	GetReturnedOrders() ([]models.Order, error)
+	GetReturnedOrders(page, pageSize int) ([]models.Order, error)
 }
 
 // Проверка реализации интерфейса
@@ -36,9 +34,10 @@ func New(storage storage.OrderStorage) OrderServiceInterface {
 
 // Принять заказ от курьера
 func (s *OrderService) AcceptOrder(orderID uint, customerID uint, storageDate time.Time) error {
-	// Проверка что этот заказ не был уже принят
 	order, err := s.storage.FindOrder(orderID)
-	_ = err
+	if err != nil {
+		return err
+	}
 	if order != nil {
 		return models.ErrOrderAlreadyExists
 	}
@@ -59,7 +58,6 @@ func (s *OrderService) AcceptOrder(orderID uint, customerID uint, storageDate ti
 	return s.storage.AddOrder(newOrder)
 }
 
-// Вернуть заказ курьеру
 func (s *OrderService) ReturnOrderToCourier(orderID uint) error {
 	order, err := s.storage.FindOrder(orderID)
 	if err != nil {
@@ -208,7 +206,14 @@ func (s *OrderService) GetOrderHistory(limit int) ([]models.Order, error) {
 	return orders, nil
 }
 
-func (s *OrderService) GetReturnedOrders() ([]models.Order, error) {
+func (s *OrderService) GetReturnedOrders(page, pageSize int) ([]models.Order, error) {
+	if page < 1 {
+		return nil, fmt.Errorf("номер страницы должен быть больше 0")
+	}
+	if pageSize < 1 {
+		return nil, fmt.Errorf("размер страницы должен быть больше 0")
+	}
+
 	orders := s.storage.GetOrders()
 	returnedOrders := []models.Order{}
 
@@ -217,5 +222,17 @@ func (s *OrderService) GetReturnedOrders() ([]models.Order, error) {
 			returnedOrders = append(returnedOrders, order)
 		}
 	}
-	return returnedOrders, nil
+
+	// индексы для пагинации
+	startIndex := (page - 1) * pageSize
+	if startIndex >= len(returnedOrders) {
+		return []models.Order{}, nil
+	}
+
+	endIndex := startIndex + pageSize
+	if endIndex > len(returnedOrders) {
+		endIndex = len(returnedOrders)
+	}
+
+	return returnedOrders[startIndex:endIndex], nil
 }

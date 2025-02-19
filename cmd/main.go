@@ -113,10 +113,8 @@ const helpMessage = `Доступные команды:
      list-returns --page 2 --per-page 5
 
 6. Получить историю заказов
-   Команда: order-history --client-id <ID>
+   Команда: order-history
    Описание: Возвращает историю заказов в порядке изменения их последнего состояния.
-   Аргументы:
-     --client-id         Идентификатор клиента (обязательный).
    Пример:
      order-history --client-id 456
 

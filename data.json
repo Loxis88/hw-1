@@ -27,7 +27,7 @@
         "id": 13,
         "customer_id": 124,
         "storage_until": "2025-02-25T18:56:26.386061119+03:00",
-        "status": "new",
+        "status": "returned",
         "delivered_at": "0001-01-01T00:00:00Z",
         "updated_at": "2025-02-18T18:56:26.386065722+03:00"
     },
