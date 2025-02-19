@@ -1,7 +1,9 @@
 package services
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 	"sort"
 	"time"
 
@@ -17,6 +19,7 @@ type OrderServiceInterface interface {
 	GetCustomerOrders(customerID uint, limit int) ([]models.Order, error)
 	GetOrderHistory(limit int) ([]models.Order, error)
 	GetReturnedOrders(page, pageSize int) ([]models.Order, error)
+	ImportOrders(path string) error
 }
 
 // Проверка реализации интерфейса
@@ -235,4 +238,20 @@ func (s *OrderService) GetReturnedOrders(page, pageSize int) ([]models.Order, er
 	}
 
 	return returnedOrders[startIndex:endIndex], nil
+}
+
+func (s OrderService) ImportOrders(path string) error {
+	var orders []models.Order
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return fmt.Errorf("failed to read file: %w", err)
+	}
+
+	if err := json.Unmarshal(data, &orders); err != nil {
+		return fmt.Errorf("failed to unmarshal orders: %w", err)
+	}
+	for _, order := range orders {
+		fmt.Println(order)
+	}
+	return nil
 }

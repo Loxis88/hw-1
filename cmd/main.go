@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
+	"strings"
 
 	"hw-1/handlers"
 	"hw-1/services"
@@ -18,7 +20,9 @@ const (
 	ListOrdersCommand    command = "list-orders"
 	ListReturnsCommand   command = "list-returns"
 	OrderHistoryCommand  command = "order-history"
+	ImportOrders         command = "import"
 	HelpCommand          command = "help"
+	ExitCommand          command = "exit"
 )
 
 func main() {
@@ -28,39 +32,58 @@ func main() {
 	}
 
 	var service services.OrderServiceInterface = services.New(store)
-	if len(os.Args) < 2 {
-		fmt.Println("No command provided")
-		fmt.Println(helpMessage)
-		return
-	}
-	mainArg := command(os.Args[1])
+	reader := bufio.NewReader(os.Stdin)
+	for {
+		fmt.Print("> ")
+		input, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Println("input error:", err)
+			continue
+		}
 
-	switch mainArg {
-	case HelpCommand:
-		fmt.Println(helpMessage)
+		input = strings.TrimSpace(input)
 
-	case AcceptOrderCommand:
-		handlers.HandleAcceptOrder(service)
+		if input == "" {
+			continue
+		}
 
-	case ReturnOrderCommand:
-		handlers.HandleReturnOrder(service)
+		// Разбиваем ввод на аргументы
+		args := strings.Fields(input)
+		mainArg := command(args[0])
 
-	case ProcessOrdersCommand:
-		handlers.HandleProcessOrders(service)
+		// Обновляем os.Args для совместимости с существующими обработчиками
+		os.Args = args
 
-	case ListOrdersCommand:
-		handlers.HandleListOrders(service)
+		switch mainArg {
+		case ExitCommand:
+			return
 
-	case ListReturnsCommand:
-		handlers.HandleListReturns(service)
+		case HelpCommand:
+			fmt.Println(helpMessage)
 
-	case OrderHistoryCommand:
-		handlers.HandleOrderHistory(service)
+		case AcceptOrderCommand:
+			handlers.HandleAcceptOrder(service)
 
-	default:
-		fmt.Println("Invalid command")
-		fmt.Println(helpMessage)
-		return
+		case ReturnOrderCommand:
+			handlers.HandleReturnOrder(service)
+
+		case ProcessOrdersCommand:
+			handlers.HandleProcessOrders(service)
+
+		case ListOrdersCommand:
+			handlers.HandleListOrders(service)
+
+		case ListReturnsCommand:
+			handlers.HandleListReturns(service)
+
+		case OrderHistoryCommand:
+			handlers.HandleOrderHistory(service)
+
+		case ImportOrders:
+			handlers.HandleImportOrders(service)
+		default:
+			fmt.Println("Введите 'help' для списка доступных команд")
+		}
 	}
 }
 
@@ -115,10 +138,18 @@ const helpMessage = `Доступные команды:
 6. Получить историю заказов
    Команда: order-history
    Описание: Возвращает историю заказов в порядке изменения их последнего состояния.
+   Аргументы:
+        --limit             Ограничить количество заказов (опционально).
    Пример:
-     order-history --client-id 456
+     order-history --limit 10
 
-7. Помощь
+7. Принять заказы из json
+    Команда: import
+    Описание: Принимает заказы из json файла и сохраняет их в файл.
+    Аргументы:
+        --path           Путь к файлу (обязательный).
+
+8. Помощь
    Команда: help
    Описание: Выводит список доступных команд и их описание.
    Пример:
