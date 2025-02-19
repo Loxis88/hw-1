@@ -18,7 +18,7 @@ func HandleProcessOrders(service services.OrderServiceInterface) {
 	action := flagSet.String("action", "", "action")
 
 	if err := flagSet.Parse(os.Args[1:]); err != nil {
-		fmt.Printf("%v", err)
+		fmt.Printf("Error parsing flags: %v\n", err)
 		return
 	}
 
@@ -34,7 +34,7 @@ func HandleProcessOrders(service services.OrderServiceInterface) {
 	orders := strings.Split(*orderIDs, ",")
 	var ids []uint = make([]uint, len(orders))
 
-	for i := range len(orders) {
+	for i := range orders {
 		id, err := strconv.Atoi(orders[i])
 		if err != nil {
 			fmt.Println("Invalid order ID:", orders[i])

@@ -14,11 +14,12 @@ func HandleImportOrders(service services.OrderServiceInterface) {
 	path := flagSet.String("path", "", "path to json orders")
 
 	if err := flagSet.Parse(os.Args[1:]); err != nil {
-		fmt.Printf("%v", err)
+		fmt.Printf("Error parsing flags: %v\n", err)
 		return
 	}
 
 	if *path == "" {
+		fmt.Println("Invalid arguments: --path is required")
 		return
 	}
 

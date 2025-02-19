@@ -17,13 +17,13 @@ const (
 
 var (
 	ErrOrderAlreadyExists       = errors.New("order already exists")
-	ErrInvalidStorageDate       = errors.New("invalid storage date")
-	ErrOrderCannotBeReturned    = errors.New("order cannot be returned")
-	ErrOrderCannotBeDelivered   = errors.New("order cannot be delivered")
-	ErrStoragePeriodExpired     = errors.New("storage period expired")
-	ErrStoragePeriodNotExpired  = errors.New("storage period not expired yet")
-	ErrReturnPeriodExpired      = errors.New("return period expired")
-	ErrOrderNotBelongToCustomer = errors.New("order does not belong to customer")
+	ErrInvalidStorageDate       = errors.New("invalid storage date: storage date cannot be in the past")
+	ErrOrderCannotBeReturned    = errors.New("order cannot be returned: order is either new or already delivered")
+	ErrOrderCannotBeDelivered   = errors.New("order cannot be delivered: order is not in new status")
+	ErrStoragePeriodExpired     = errors.New("storage period expired: order cannot be returned")
+	ErrStoragePeriodNotExpired  = errors.New("storage period not expired yet: order cannot be returned")
+	ErrReturnPeriodExpired      = errors.New("return period expired: order cannot be returned")
+	ErrOrderNotBelongToCustomer = errors.New("order does not belong to customer: invalid customer ID")
 )
 
 type Order struct {

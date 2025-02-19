@@ -13,7 +13,11 @@ func HandleListOrders(service services.OrderServiceInterface) {
 
 	customerID := flagSet.Uint("client-id", 0, "clientID")
 	limit := flagSet.Int("limit", 0, "limit")
-	flagSet.Parse(os.Args[1:])
+
+	if err := flagSet.Parse(os.Args[1:]); err != nil {
+		fmt.Printf("Error parsing flags: %v\n", err)
+		return
+	}
 
 	if *customerID == 0 {
 		fmt.Println("Invalid client ID")
@@ -25,6 +29,7 @@ func HandleListOrders(service services.OrderServiceInterface) {
 		fmt.Println("Error listing orders:", err)
 		return
 	}
+
 	fmt.Println("Orders:")
 	for _, order := range orders {
 		fmt.Print(order)

@@ -16,7 +16,10 @@ func HandleAcceptOrder(service services.OrderServiceInterface) {
 	receiverID := flagSet.Uint("receiver-id", 0, "receiverID")
 	storageDuration := flagSet.Uint("storage-duration", 0, "duration")
 
-	flagSet.Parse(os.Args[1:])
+	if err := flagSet.Parse(os.Args[1:]); err != nil {
+		fmt.Printf("Error parsing flags: %v\n", err)
+		return
+	}
 
 	if flagSet.NFlag() != 3 || *orderID == 0 || *receiverID == 0 || *storageDuration == 0 {
 		fmt.Println("Invalid arguments")

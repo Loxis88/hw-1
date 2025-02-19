@@ -15,7 +15,12 @@ func HandleListReturns(service services.OrderServiceInterface) {
 	perPage := flagSet.Int("per-page", 10, "per-page")
 
 	if err := flagSet.Parse(os.Args[1:]); err != nil {
-		fmt.Printf("%v", err)
+		fmt.Printf("Error parsing flags: %v\n", err)
+		return
+	}
+
+	if *page < 1 || *perPage < 1 {
+		fmt.Println("Invalid arguments: --page and --per-page must be greater than 0")
 		return
 	}
 
