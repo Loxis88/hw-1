@@ -9,7 +9,7 @@ import (
 	"hw-1/services"
 )
 
-func HandleAcceptOrder(service services.OrderServiceInterface) {
+func HandleAcceptOrder(service services.OrderServiceInterface) error {
 	flagSet := flag.NewFlagSet("accept-order", flag.ContinueOnError)
 
 	orderID := flagSet.Uint("order-id", 0, "orderID")
@@ -17,19 +17,18 @@ func HandleAcceptOrder(service services.OrderServiceInterface) {
 	storageDuration := flagSet.Uint("storage-duration", 0, "duration")
 
 	if err := flagSet.Parse(os.Args[1:]); err != nil {
-		fmt.Printf("Error parsing flags: %v\n", err)
-		return
+		return fmt.Errorf("Error parsing flags: %v\n", err)
 	}
 
-	if flagSet.NFlag() != 3 || *orderID == 0 || *receiverID == 0 || *storageDuration == 0 {
-		fmt.Println("Invalid arguments", *orderID, *receiverID, *storageDuration)
-		return
+	if flagSet.NFlag() != 3 {
+
+		return fmt.Errorf("Invalid arguments", *orderID, *receiverID, *storageDuration)
 	}
 
 	if err := service.AcceptOrder(*orderID, *receiverID, time.Now().Add(time.Duration(*storageDuration)*time.Hour*24)); err != nil {
-		fmt.Println("Error accepting order:", err)
-		return
+		return fmt.Errorf("Error accepting order:", err)
 	}
 
 	fmt.Println("Orders accepted successfully")
+	return nil
 }
