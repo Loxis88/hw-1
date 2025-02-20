@@ -66,7 +66,6 @@ func (s *Storage) ValidateOrders() {
 	s.save()
 }
 
-// AddOrder adds a new order to the storage
 func (s *Storage) AddOrder(order models.Order) error {
 	order.UpdatedAt = time.Now()
 	if order.Status == "" {
@@ -79,7 +78,6 @@ func (s *Storage) AddOrder(order models.Order) error {
 	return nil
 }
 
-// UpdateOrder updates an existing order in the storage
 func (s *Storage) UpdateOrder(order models.Order) error {
 	for i, o := range s.orders {
 		if o.ID == order.ID {
@@ -93,7 +91,6 @@ func (s *Storage) UpdateOrder(order models.Order) error {
 	return fmt.Errorf("order with id %d not found", order.ID)
 }
 
-// DeleteOrder deletes an order from the storage
 func (s *Storage) DeleteOrder(id uint) error {
 	for i, order := range s.orders {
 		if order.ID == id {
@@ -107,12 +104,10 @@ func (s *Storage) DeleteOrder(id uint) error {
 	return fmt.Errorf("order with id %d not found", id)
 }
 
-// GetOrders retrieves all orders from the storage
 func (s *Storage) GetOrders() []models.Order {
 	return s.orders
 }
 
-// FindOrder finds an order by its ID
 func (s *Storage) FindOrder(id uint) (*models.Order, error) {
 	for i, order := range s.orders {
 		if order.ID == id {
