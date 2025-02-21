@@ -10,7 +10,7 @@ import (
 	"hw-1/services"
 )
 
-func HandleProcessOrders(service services.OrderServiceInterface) {
+func HandleProcessOrders(service services.OrderServiceInterface) error {
 	flagSet := flag.NewFlagSet("process-orders", flag.ContinueOnError)
 
 	clientID := flagSet.Uint("client-id", 0, "clientID")
@@ -18,17 +18,14 @@ func HandleProcessOrders(service services.OrderServiceInterface) {
 	action := flagSet.String("action", "", "action")
 
 	if err := flagSet.Parse(os.Args[1:]); err != nil {
-		fmt.Printf("Error parsing flags: %v\n", err)
-		return
+		return fmt.Errorf("Error parsing flags: %v\n", err)
 	}
 
 	if flagSet.NFlag() < 3 {
-		fmt.Println("Invalid arguments")
-		return
+		return fmt.Errorf("Invalid arguments")
 	}
 	if *action != "return" && *action != "issue" {
-		fmt.Println("Invalid action")
-		return
+		return fmt.Errorf("Invalid action")
 	}
 
 	orders := strings.Split(*orderIDs, ",")
@@ -37,25 +34,22 @@ func HandleProcessOrders(service services.OrderServiceInterface) {
 	for i := range orders {
 		id, err := strconv.Atoi(orders[i])
 		if err != nil {
-			fmt.Println("Invalid order ID:", orders[i])
-			return
+			return fmt.Errorf("Invalid order ID:", orders[i])
 		}
 		ids[i] = uint(id)
 	}
 	switch *action {
 	case "return":
 		if err := service.AcceptReturns(*clientID, ids...); err != nil {
-			fmt.Println("Error returning orders:", err)
-			return
+
+			return fmt.Errorf("Error returning orders:", err)
 		}
 		fmt.Println("Заказы успешно возвращены")
-		return
 	case "issue":
 		if err := service.DeliverOrders(*clientID, ids...); err != nil {
-			fmt.Println("Error issueing orders:", err)
-			return
+			return fmt.Errorf("Error issueing orders:", err)
 		}
 		fmt.Println("Заказы успешно выданы")
-		return
 	}
+	return nil
 }

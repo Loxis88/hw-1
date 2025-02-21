@@ -8,28 +8,26 @@ import (
 	"hw-1/services"
 )
 
-func HandleOrderHistory(service services.OrderServiceInterface) {
+func HandleOrderHistory(service services.OrderServiceInterface) error {
 	flagSet := flag.NewFlagSet("order-history", flag.ContinueOnError)
-
 	limit := flagSet.Int("limit", 0, "limit")
+
 	if err := flagSet.Parse(os.Args[1:]); err != nil {
-		fmt.Printf("Error parsing flags: %v\n", err)
-		return
+		return fmt.Errorf("Error parsing flags: %v\n", err)
 	}
 
 	if *limit < 0 {
-		fmt.Println("Invalid arguments: --limit must be greater than or equal to 0")
-		return
+		return fmt.Errorf("Invalid arguments: --limit must be greater than or equal to 0")
 	}
 
 	history, err := service.GetOrderHistory(*limit)
 	if err != nil {
-		fmt.Println("Error listing order history:", err)
-		return
+		return fmt.Errorf("Error listing order history:", err)
 	}
 
 	fmt.Println("Order History:")
 	for _, order := range history {
 		fmt.Print(order)
 	}
+	return nil
 }

@@ -33,15 +33,25 @@ func main() {
 			continue
 		}
 
-		commandName := os.Args[1]
+		args := strings.Fields(input)
+		commandName := args[0]
+
+		// замена os.Args на инпут
+		os.Args = args
+		// тут кароче костыль потому что я не могу полоижть команду помощи в мапу
+		if commandName == commands.HelpCommand {
+			commands.HandleHelp(service)
+			continue
+		}
+
 		cmd, exists := commands.Commands[commandName]
 		if !exists {
 			fmt.Println("Invalid command:", commandName)
-			commands.Commands["help"].Handle(service) // Вывод справки при ошибке
-			return
+			commands.HandleHelp(service)
+			continue
 		}
 
 		// Выполняем обработчик команды
-		err := cmd.Handle(service)
+		err = cmd.Handle(service)
 	}
 }
