@@ -10,6 +10,11 @@ import (
 	"hw-1/services"
 )
 
+const (
+	ReturnAction = "return"
+	IssueAction  = "issue"
+)
+
 func HandleProcessOrders(service services.OrderServiceInterface) error {
 	flagSet := flag.NewFlagSet("process-orders", flag.ContinueOnError)
 
@@ -24,7 +29,7 @@ func HandleProcessOrders(service services.OrderServiceInterface) error {
 	if flagSet.NFlag() < 3 {
 		return fmt.Errorf("Invalid arguments")
 	}
-	if *action != "return" && *action != "issue" {
+	if *action != ReturnAction && *action != IssueAction {
 		return fmt.Errorf("Invalid action")
 	}
 

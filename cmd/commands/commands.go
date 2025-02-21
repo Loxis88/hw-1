@@ -2,10 +2,11 @@ package commands
 
 import (
 	"fmt"
-	"hw-1/handlers"
-	"hw-1/services"
 	"os"
 	"slices"
+
+	"hw-1/handlers"
+	"hw-1/services"
 )
 
 const (
