@@ -27,6 +27,12 @@ func HandleListReturns(service services.OrderServiceInterface) error {
 	if err != nil {
 		return fmt.Errorf("Error listing returns:", err)
 	}
+
+	if len(returns) == 0 {
+		fmt.Println("No returns found")
+		return nil
+	}
+
 	fmt.Println("Returns")
 	for _, order := range returns {
 		fmt.Print(order)

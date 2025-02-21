@@ -44,14 +44,14 @@ func HandleProcessOrders(service services.OrderServiceInterface) error {
 		ids[i] = uint(id)
 	}
 	switch *action {
-	case "return":
+	case ReturnAction:
 		if err := service.AcceptReturns(*clientID, ids...); err != nil {
 
 			return fmt.Errorf("Error returning orders:", err)
 		}
 		fmt.Println("Заказы успешно возвращены")
-	case "issue":
-		if err := service.DeliverOrders(*clientID, ids...); err != nil {
+	case IssueAction:
+		if err := service.IssueOrders(*clientID, ids...); err != nil {
 			return fmt.Errorf("Error issueing orders:", err)
 		}
 		fmt.Println("Заказы успешно выданы")

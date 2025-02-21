@@ -1,9 +1,11 @@
 package commands
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"slices"
+	"strings"
 
 	"hw-1/handlers"
 	"hw-1/services"
@@ -61,7 +63,49 @@ var Commands = map[string]Command{
 	},
 }
 
-// тут
+// наверное стоит это вынести куда то в другое место но я пока не знаю куда
+func Serve(service services.OrderServiceInterface) {
+	reader := bufio.NewReader(os.Stdin)
+	for {
+		fmt.Print("> ")
+		input, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Println("input error:", err)
+			continue
+		}
+
+		input = strings.TrimSpace(input)
+
+		if input == "" {
+			continue
+		}
+
+		args := strings.Fields(input)
+		commandName := args[0]
+
+		// замена os.Args на инпут
+		os.Args = args
+		// тут кароче костыль потому что я не могу полоижть команду помощи в мапу
+		if commandName == HelpCommand {
+			HandleHelp()
+			continue
+		}
+
+		cmd, exists := Commands[commandName]
+		if !exists {
+			fmt.Println("Invalid command:", commandName)
+			HandleHelp()
+			continue
+		}
+
+		// Выполняем обработчик команды
+		err = cmd.Handle(service)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+}
+
 // HandleHelp выводит список доступных команд.
 func HandleHelp() {
 	if len(os.Args) > 2 {
@@ -70,7 +114,8 @@ func HandleHelp() {
 	}
 	if len(os.Args) == 2 {
 		if os.Args[1] == HelpCommand {
-			fmt.Printf("Ввести инормацию по командам (команде)\n  Использование: help [имя команды] (необязательный параметр)")
+			fmt.Printf("Ввести инормацию по командам (команде)\n  Использование: help [имя команды] (необязательный параметр)\n")
+			return
 		}
 		if command, ok := Commands[os.Args[1]]; ok {
 			fmt.Printf("%s\n  %s\n", os.Args[1], command.Description)
