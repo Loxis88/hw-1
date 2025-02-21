@@ -40,18 +40,21 @@ func main() {
 		os.Args = args
 		// тут кароче костыль потому что я не могу полоижть команду помощи в мапу
 		if commandName == commands.HelpCommand {
-			commands.HandleHelp(service)
+			commands.HandleHelp()
 			continue
 		}
 
 		cmd, exists := commands.Commands[commandName]
 		if !exists {
 			fmt.Println("Invalid command:", commandName)
-			commands.HandleHelp(service)
+			commands.HandleHelp()
 			continue
 		}
 
 		// Выполняем обработчик команды
 		err = cmd.Handle(service)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 }

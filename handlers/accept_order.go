@@ -21,12 +21,11 @@ func HandleAcceptOrder(service services.OrderServiceInterface) error {
 	}
 
 	if flagSet.NFlag() != 3 {
-
 		return fmt.Errorf("Invalid arguments", *orderID, *receiverID, *storageDuration)
 	}
 
 	if err := service.AcceptOrder(*orderID, *receiverID, time.Now().Add(time.Duration(*storageDuration)*time.Hour*24)); err != nil {
-		return fmt.Errorf("Error accepting order:", err)
+		return fmt.Errorf("Error accepting order: %W", err)
 	}
 
 	fmt.Println("Orders accepted successfully")

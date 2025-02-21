@@ -60,8 +60,25 @@ var Commands = map[string]Command{
 	},
 }
 
+// тут
 // HandleHelp выводит список доступных команд.
-func HandleHelp(service services.OrderServiceInterface) {
+func HandleHelp() {
+	if len(os.Args) > 2 {
+		fmt.Println("too many arguments")
+		return
+	}
+	if len(os.Args) == 2 {
+		if os.Args[1] == HelpCommand {
+			fmt.Printf("Ввести инормацию по командам (команде)\n  Использование: help [имя команды] (необязательный параметр)")
+		}
+		if command, ok := Commands[os.Args[1]]; ok {
+			fmt.Printf("%s\n  %s\n", os.Args[1], command.Description)
+		} else {
+			fmt.Printf("command %s not found\n", os.Args[1])
+		}
+		return
+	}
+
 	fmt.Println("Доступные команды:")
 	commands := []string{}
 
