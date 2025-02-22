@@ -5,8 +5,16 @@ import (
 	"fmt"
 	"os"
 
+	"hw-1/cmd/commands"
 	"hw-1/services"
 )
+
+func init() {
+	commands.RegisterCommand("list-returns", commands.Command{
+		Description: "Получить список возвратов\n  Использование: list-returns [--page <N>] [--per-page <N>]",
+		Handle:      HandleListReturns,
+	})
+}
 
 func HandleListReturns(service services.OrderServiceInterface) error {
 	flagSet := flag.NewFlagSet("list-returns", flag.ContinueOnError)

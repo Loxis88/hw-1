@@ -5,8 +5,16 @@ import (
 	"fmt"
 	"os"
 
+	"hw-1/cmd/commands"
 	"hw-1/services"
 )
+
+func init() {
+	commands.RegisterCommand("list-orders", commands.Command{
+		Description: "Получить список заказов\n  Использование: list-orders --client-id <ID> [--limit <N>]",
+		Handle:      HandleListOrders,
+	})
+}
 
 func HandleListOrders(service services.OrderServiceInterface) error {
 	flagSet := flag.NewFlagSet("list-orders", flag.ContinueOnError)

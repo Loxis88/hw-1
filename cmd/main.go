@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "hw-1/handlers"
 	_ "hw-1/storage/json_storage" // нужно для инициализации пакета для выполнения init функции котрая добавляет json-storage в список доступных хранилищ
 
 	"hw-1/cmd/commands"

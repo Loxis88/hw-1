@@ -5,8 +5,16 @@ import (
 	"fmt"
 	"os"
 
+	"hw-1/cmd/commands"
 	"hw-1/services"
 )
+
+func init() {
+	commands.RegisterCommand("order-history", commands.Command{
+		Description: "Получить историю заказов\n  Использование: order-history [--limit]",
+		Handle:      HandleOrderHistory,
+	})
+}
 
 func HandleOrderHistory(service services.OrderServiceInterface) error {
 	flagSet := flag.NewFlagSet("order-history", flag.ContinueOnError)
