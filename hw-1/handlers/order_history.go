@@ -5,31 +5,37 @@ import (
 	"fmt"
 	"os"
 
+	"hw-1/cmd/commands"
 	"hw-1/services"
 )
 
-func HandleOrderHistory(service services.OrderServiceInterface) {
-	flagSet := flag.NewFlagSet("order-history", flag.ContinueOnError)
+func init() {
+	commands.RegisterCommand("order-history", commands.Command{
+		Description: "Получить историю заказов\n  Использование: order-history [--limit]",
+		Handle:      HandleOrderHistory,
+	})
+}
 
+func HandleOrderHistory(service services.OrderServiceInterface) error {
+	flagSet := flag.NewFlagSet("order-history", flag.ContinueOnError)
 	limit := flagSet.Int("limit", 0, "limit")
+
 	if err := flagSet.Parse(os.Args[1:]); err != nil {
-		fmt.Printf("Error parsing flags: %v\n", err)
-		return
+		return fmt.Errorf("Error parsing flags: %w\n", err)
 	}
 
 	if *limit < 0 {
-		fmt.Println("Invalid arguments: --limit must be greater than or equal to 0")
-		return
+		return fmt.Errorf("Invalid arguments: --limit must be greater than or equal to 0")
 	}
 
 	history, err := service.GetOrderHistory(*limit)
 	if err != nil {
-		fmt.Println("Error listing order history:", err)
-		return
+		return fmt.Errorf("Error listing order history: %w", err)
 	}
 
 	fmt.Println("Order History:")
 	for _, order := range history {
 		fmt.Print(order)
 	}
+	return nil
 }

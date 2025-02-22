@@ -4,32 +4,51 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
+	"hw-1/cmd/commands"
 	"hw-1/services"
 )
 
-func HandleAcceptOrder(service services.OrderServiceInterface) {
+func init() {
+	commands.RegisterCommand("accept-order", commands.Command{
+		Description: "Принять заказ от курьера\n  Использование: accept-order --order-id <ID> --receiver-id <ID> --storage-duration <DAYS>",
+		Handle:      HandleAcceptOrder,
+	})
+}
+
+func HandleAcceptOrder(service services.OrderServiceInterface) error {
 	flagSet := flag.NewFlagSet("accept-order", flag.ContinueOnError)
 
-	orderID := flagSet.Uint("order-id", 0, "orderID")
-	receiverID := flagSet.Uint("receiver-id", 0, "receiverID")
-	storageDuration := flagSet.Uint("storage-duration", 0, "duration")
+	orderID := flagSet.Uint("order-id", 0, "order ID (required, must be positive)")
+	receiverID := flagSet.Uint("receiver-id", 0, "receiver ID (required, must be positive)")
+	storageDuration := flagSet.Uint("storage-duration", 0, "storage duration in days (required, must be positive)")
 
 	if err := flagSet.Parse(os.Args[1:]); err != nil {
-		fmt.Printf("Error parsing flags: %v\n", err)
-		return
+		return fmt.Errorf("failed to parse flags: %w", err)
 	}
 
-	if flagSet.NFlag() != 3 || *orderID == 0 || *receiverID == 0 || *storageDuration == 0 {
-		fmt.Println("Invalid arguments", *orderID, *receiverID, *storageDuration)
-		return
+	missingFlags := []string{}
+	if *orderID == 0 {
+		missingFlags = append(missingFlags, "-order-id")
+	}
+	if *receiverID == 0 {
+		missingFlags = append(missingFlags, "-receiver-id")
+	}
+	if *storageDuration == 0 {
+		missingFlags = append(missingFlags, "-torage-duration")
 	}
 
-	if err := service.AcceptOrder(*orderID, *receiverID, time.Now().Add(time.Duration(*storageDuration)*time.Hour*24)); err != nil {
-		fmt.Println("Error accepting order:", err)
-		return
+	if len(missingFlags) > 0 {
+		return fmt.Errorf("missing required flags: %s", strings.Join(missingFlags, ", "))
 	}
 
-	fmt.Println("Orders accepted successfully")
+	err := service.AcceptOrder(*orderID, *receiverID, time.Now().Add(time.Duration(*storageDuration)*24*time.Hour))
+	if err != nil {
+		return fmt.Errorf("error accepting order: %w", err)
+	}
+
+	fmt.Println("Order accepted successfully")
+	return nil
 }

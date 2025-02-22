@@ -7,55 +7,84 @@ import (
 	"strconv"
 	"strings"
 
+	"hw-1/cmd/commands"
 	"hw-1/services"
 )
 
-func HandleProcessOrders(service services.OrderServiceInterface) {
+const (
+	ReturnAction = "return"
+	IssueAction  = "issue"
+)
+
+func init() {
+	commands.RegisterCommand("process-orders", commands.Command{
+		Description: "Выдать заказы или принять возвраты\n  Использование: process-orders --client-id <ID> --order-ids <ID1,ID2,...> --action <issue|return>",
+		Handle:      HandleProcessOrders,
+	})
+}
+
+func HandleProcessOrders(service services.OrderServiceInterface) error {
 	flagSet := flag.NewFlagSet("process-orders", flag.ContinueOnError)
 
-	clientID := flagSet.Uint("client-id", 0, "clientID")
-	orderIDs := flagSet.String("order-ids", "", "orderIDs")
-	action := flagSet.String("action", "", "action")
+	clientID := flagSet.Uint("client-id", 0, "client ID (required, must be positive)")
+	orderIDs := flagSet.String("order-ids", "", "comma-separated order IDs (required)")
+	action := flagSet.String("action", "", "action: 'return' or 'issue' (required)")
 
 	if err := flagSet.Parse(os.Args[1:]); err != nil {
-		fmt.Printf("Error parsing flags: %v\n", err)
-		return
+		return fmt.Errorf("failed to parse flags: %w", err)
 	}
 
-	if flagSet.NFlag() < 3 {
-		fmt.Println("Invalid arguments")
-		return
+	missingFlags := []string{}
+	if *clientID == 0 {
+		missingFlags = append(missingFlags, "-client-id")
 	}
-	if *action != "return" && *action != "issue" {
-		fmt.Println("Invalid action")
-		return
+	if *orderIDs == "" {
+		missingFlags = append(missingFlags, "-order-ids")
+	}
+	if *action == "" {
+		missingFlags = append(missingFlags, "-action")
 	}
 
-	orders := strings.Split(*orderIDs, ",")
-	var ids []uint = make([]uint, len(orders))
+	if len(missingFlags) > 0 {
+		return fmt.Errorf("missing required flags: %s", strings.Join(missingFlags, ", "))
+	}
 
-	for i := range orders {
-		id, err := strconv.Atoi(orders[i])
+	if *clientID == 0 {
+		return fmt.Errorf("client-id must be a positive number, got %d", *clientID)
+	}
+
+	if *orderIDs == "" {
+		return fmt.Errorf("order-ids cannot be empty")
+	}
+	orderStrs := strings.Split(*orderIDs, ",")
+	if len(orderStrs) == 0 {
+		return fmt.Errorf("order-ids must contain at least one ID")
+	}
+
+	ids := make([]uint, 0, len(orderStrs))
+	for _, orderStr := range orderStrs {
+		orderStr = strings.TrimSpace(orderStr)
+		id, err := strconv.ParseUint(orderStr, 10, 32)
 		if err != nil {
-			fmt.Println("Invalid order ID:", orders[i])
-			return
+			return fmt.Errorf("invalid order ID '%s': %w", orderStr, err)
 		}
-		ids[i] = uint(id)
+		ids = append(ids, uint(id))
 	}
+
 	switch *action {
-	case "return":
+	case ReturnAction:
 		if err := service.AcceptReturns(*clientID, ids...); err != nil {
-			fmt.Println("Error returning orders:", err)
-			return
+			return fmt.Errorf("error returning orders: %w", err)
 		}
-		fmt.Println("Заказы успешно возвращены")
-		return
-	case "issue":
-		if err := service.DeliverOrders(*clientID, ids...); err != nil {
-			fmt.Println("Error issueing orders:", err)
-			return
+		fmt.Println("Orders returned successfully")
+	case IssueAction:
+		if err := service.IssueOrders(*clientID, ids...); err != nil {
+			return fmt.Errorf("error issuing orders: %w", err)
 		}
-		fmt.Println("Заказы успешно выданы")
-		return
+		fmt.Println("Orders issued successfully")
+	default:
+		return fmt.Errorf("invalid action '%s', must be '%s' or '%s'", *action, ReturnAction, IssueAction)
 	}
+
+	return nil
 }

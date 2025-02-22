@@ -7,14 +7,23 @@ import (
 	"time"
 
 	"hw-1/models"
+	"hw-1/storage"
 )
+
+// все проверки ошибок связанные с бизнес логикой перенесены в бизнес логику service
 
 type Storage struct {
 	orders []models.Order
 	path   string
 }
 
-func New(path string) (*Storage, error) {
+// Здесь при инициализации в мапу кладется функция инициализации этого типа хранилища
+func init() {
+	storage.RegisterStorage("json-storage", New)
+}
+
+// в последствии можно изменить сигнатуру функции new для использования какого нибудь обьекта конфига для инициализации нужного хранилища
+func New(path string) (storage.OrderStorage, error) {
 	file, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -23,12 +32,12 @@ func New(path string) (*Storage, error) {
 				path:   path,
 			}, nil
 		}
-		return nil, fmt.Errorf("failed to read storage file: %w", err)
+		return nil, fmt.Errorf("%s: %w", ErrStorageFileRead, err)
 	}
 
 	var orders []models.Order
 	if err := json.Unmarshal(file, &orders); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal orders: %w", err)
+		return nil, fmt.Errorf("%s: %w", ErrUnmarshalOrders, err)
 	}
 
 	storage := &Storage{
@@ -43,14 +52,14 @@ func New(path string) (*Storage, error) {
 func (s *Storage) save() error {
 	file, err := os.Create(s.path)
 	if err != nil {
-		return fmt.Errorf("failed to create storage file: %w", err)
+		return fmt.Errorf("%s: %w", ErrStorageFileCreate, err)
 	}
 	defer file.Close()
 
 	encoder := json.NewEncoder(file)
 	encoder.SetIndent("", "    ")
 	if err := encoder.Encode(s.orders); err != nil {
-		return fmt.Errorf("failed to encode orders: %w", err)
+		return fmt.Errorf("%s: %w", ErrMarshalOrders, err)
 	}
 	return nil
 }
@@ -66,53 +75,55 @@ func (s *Storage) ValidateOrders() {
 	s.save()
 }
 
+// AddOrder adds a new order to the storage
 func (s *Storage) AddOrder(order models.Order) error {
-	order.UpdatedAt = time.Now()
-	if order.Status == "" {
-		order.Status = models.StatusNew
-	}
 	s.orders = append(s.orders, order)
+
 	if err := s.save(); err != nil {
-		return fmt.Errorf("failed to save order: %w", err)
+		return fmt.Errorf("%s: %w", ErrStorageSave, err)
 	}
 	return nil
 }
 
+// UpdateOrder updates an existing order in the storage
 func (s *Storage) UpdateOrder(order models.Order) error {
 	for i, o := range s.orders {
 		if o.ID == order.ID {
 			s.orders[i] = order
 			if err := s.save(); err != nil {
-				return fmt.Errorf("failed to save order: %w", err)
+				return fmt.Errorf("%s: %w", ErrStorageFileWrite, err)
 			}
 			return nil
 		}
 	}
-	return fmt.Errorf("order with id %d not found", order.ID)
+	return storage.ErrOrderNotFound
 }
 
+// DeleteOrder deletes an order from the storage
 func (s *Storage) DeleteOrder(id uint) error {
 	for i, order := range s.orders {
 		if order.ID == id {
 			s.orders = append(s.orders[:i], s.orders[i+1:]...)
 			if err := s.save(); err != nil {
-				return fmt.Errorf("failed to save order: %w", err)
+				return fmt.Errorf("%s: %w", ErrStorageSave, err)
 			}
 			return nil
 		}
 	}
-	return fmt.Errorf("order with id %d not found", id)
+	return storage.ErrOrderNotFound
 }
 
+// GetOrders retrieves all orders from the storage
 func (s *Storage) GetOrders() []models.Order {
 	return s.orders
 }
 
+// FindOrder finds an order by its ID
 func (s *Storage) FindOrder(id uint) (*models.Order, error) {
 	for i, order := range s.orders {
 		if order.ID == id {
 			return &s.orders[i], nil
 		}
 	}
-	return nil, fmt.Errorf("order with id %d not found", id)
+	return nil, fmt.Errorf("order %d: %w", id, storage.ErrOrderNotFound)
 }
