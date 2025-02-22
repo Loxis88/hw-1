@@ -20,7 +20,7 @@ func HandleReturnOrder(service services.OrderServiceInterface) error {
 	}
 
 	if err := service.ReturnOrderToCourier(*orderID); err != nil {
-		return fmt.Errorf("Error returning order:", err)
+		return fmt.Errorf("Error returning order: %w", err)
 	}
 
 	fmt.Println("Order returned successfully")

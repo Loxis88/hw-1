@@ -13,7 +13,7 @@ func HandleOrderHistory(service services.OrderServiceInterface) error {
 	limit := flagSet.Int("limit", 0, "limit")
 
 	if err := flagSet.Parse(os.Args[1:]); err != nil {
-		return fmt.Errorf("Error parsing flags: %v\n", err)
+		return fmt.Errorf("Error parsing flags: %w\n", err)
 	}
 
 	if *limit < 0 {
@@ -22,7 +22,7 @@ func HandleOrderHistory(service services.OrderServiceInterface) error {
 
 	history, err := service.GetOrderHistory(*limit)
 	if err != nil {
-		return fmt.Errorf("Error listing order history:", err)
+		return fmt.Errorf("Error listing order history: %w", err)
 	}
 
 	fmt.Println("Order History:")

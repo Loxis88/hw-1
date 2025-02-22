@@ -19,12 +19,12 @@ func HandleListOrders(service services.OrderServiceInterface) error {
 	}
 
 	if *customerID == 0 {
-		return fmt.Errorf("Invalid client ID")
+		return fmt.Errorf("Флаг client-id не указан")
 	}
 
 	orders, err := service.GetCustomerOrders(*customerID, *limit)
 	if err != nil {
-		return fmt.Errorf("Error listing orders:", err)
+		return fmt.Errorf("Error listing orders: %w", err)
 	}
 
 	fmt.Println("Orders:")
