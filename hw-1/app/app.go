@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"hw-1/cmd/registry"
+	"hw-1/cli/registry"
 	"hw-1/services"
 )
 

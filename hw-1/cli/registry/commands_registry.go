@@ -2,7 +2,7 @@
 package registry
 
 import (
-	"hw-1/cmd/commands"
+	"hw-1/cli/commands"
 	"hw-1/handlers"
 	"hw-1/services"
 )
