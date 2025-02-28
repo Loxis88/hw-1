@@ -26,15 +26,49 @@ type Command struct {
 	Handle      func(services.OrderServiceInterface) error
 }
 
-var Commands = make(map[string]Command)
+var registeredCommands map[string]Command
 
-// RegisterCommand — функция для регистрации команд
-func RegisterCommand(name string, cmd Command) {
-	Commands[name] = cmd
+func GetRegisteredCommands() map[string]Command {
+	return registeredCommands
 }
 
-// наверное стоит это вынести куда то в другое место но я пока не знаю куда
+// RegisterCommand — функция для регистрации команд
+
+func RegisterCommands(handlers map[string]func(service services.OrderServiceInterface) error) map[string]Command {
+	descriptions := map[string]string{
+		AcceptOrderCommand:   "Принять заказ от курьера\n  Использование: accept-order --order-id <ID> --receiver-id <ID> --storage-duration <DAYS>",
+		ReturnOrderCommand:   "Вернуть заказ",
+		ProcessOrdersCommand: "Обработать заказы",
+		ListOrdersCommand:    "Список заказов",
+		ListReturnsCommand:   "Список возвратов",
+		OrderHistoryCommand:  "История заказов",
+		ImportOrders:         "Импортировать заказы",
+		HelpCommand:          "Показать справку",
+		ExitCommand:          "Выход из программы",
+	}
+
+	commands := make(map[string]Command)
+
+	// Регистрируем команды с соответствующими обработчиками
+	for cmdName, handler := range handlers {
+		if desc, ok := descriptions[cmdName]; ok {
+			commands[cmdName] = Command{
+				Description: desc,
+				Handle:      handler,
+			}
+		}
+	}
+
+	return commands
+}
+
 func Serve(service services.OrderServiceInterface) {
+	// Подготовим хендлеры для регистрации
+	handlers := PrepareHandlers()
+
+	// Получаем команды из метода RegisterCommands
+	commands := RegisterCommands(handlers)
+
 	reader := bufio.NewReader(os.Stdin)
 	for {
 		fmt.Print("> ")
@@ -55,7 +89,7 @@ func Serve(service services.OrderServiceInterface) {
 
 		os.Args = args
 
-		cmd, exists := Commands[commandName]
+		cmd, exists := commands[commandName]
 		if !exists {
 			fmt.Println("Invalid command:", commandName, "type help for more information")
 			continue

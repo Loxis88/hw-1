@@ -5,16 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"hw-1/cmd/commands"
 	"hw-1/services"
 )
-
-func init() {
-	commands.RegisterCommand("return-order", commands.Command{
-		Description: "Вернуть заказ курьеру\n  Использование: return-order --order-id <ID>",
-		Handle:      HandleReturnOrder,
-	})
-}
 
 func HandleReturnOrder(service services.OrderServiceInterface) error {
 	flagSet := flag.NewFlagSet("return-order", flag.ContinueOnError)

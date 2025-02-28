@@ -7,16 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"hw-1/cmd/commands"
 	"hw-1/services"
 )
-
-func init() {
-	commands.RegisterCommand("accept-order", commands.Command{
-		Description: "Принять заказ от курьера\n  Использование: accept-order --order-id <ID> --receiver-id <ID> --storage-duration <DAYS>",
-		Handle:      HandleAcceptOrder,
-	})
-}
 
 func HandleAcceptOrder(service services.OrderServiceInterface) error {
 	flagSet := flag.NewFlagSet("accept-order", flag.ContinueOnError)
