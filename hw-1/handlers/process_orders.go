@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 
-	"hw-1/cmd/commands"
 	"hw-1/services"
 )
 
@@ -15,13 +14,6 @@ const (
 	ReturnAction = "return"
 	IssueAction  = "issue"
 )
-
-func init() {
-	commands.RegisterCommand("process-orders", commands.Command{
-		Description: "Выдать заказы или принять возвраты\n  Использование: process-orders --client-id <ID> --order-ids <ID1,ID2,...> --action <issue|return>",
-		Handle:      HandleProcessOrders,
-	})
-}
 
 func HandleProcessOrders(service services.OrderServiceInterface) error {
 	flagSet := flag.NewFlagSet("process-orders", flag.ContinueOnError)

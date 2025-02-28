@@ -5,16 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"hw-1/cmd/commands"
 	"hw-1/services"
 )
-
-func init() {
-	commands.RegisterCommand("import", commands.Command{
-		Description: "Импортировать заказы\n  Использование: import [--path <путь к json>]",
-		Handle:      HandleImportOrders,
-	})
-}
 
 func HandleImportOrders(service services.OrderServiceInterface) error {
 	flagSet := flag.NewFlagSet("import", flag.ContinueOnError)

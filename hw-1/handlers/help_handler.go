@@ -9,13 +9,6 @@ import (
 	"hw-1/services"
 )
 
-func init() {
-	commands.RegisterCommand("help", commands.Command{
-		Description: "Ввести инормацию по командам (команде)\n  Использование: help [имя команды] (необязательный параметр)\n",
-		Handle:      HandleHelp,
-	})
-}
-
 func HandleHelp(service services.OrderServiceInterface) error {
 	if len(os.Args) > 2 {
 		return fmt.Errorf("too many arguments")
