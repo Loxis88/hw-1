@@ -9,29 +9,31 @@ import (
 	"hw-1/services"
 )
 
-func HandleHelp(service services.OrderServiceInterface) error {
-	if len(os.Args) > 2 {
-		return fmt.Errorf("too many arguments")
-	}
-	if len(os.Args) == 2 {
-		if command, ok := commands.Commands[os.Args[1]]; ok {
-			fmt.Printf("%s\n  %s\n", os.Args[1], command.Description)
-		} else {
-			return fmt.Errorf("command %s not found\n", os.Args[1])
-		}
-		return nil
-	}
+// HandleHelp показывает информацию о доступных командах
+func HandleHelp(service services.OrderServiceInterface, commandsList map[string]commands.Command) error {
+    if len(os.Args) > 2 {
+        return fmt.Errorf("too many arguments")
+    }
 
-	fmt.Println("Доступные команды:")
-	cmd := []string{}
+    if len(os.Args) == 2 {
+        if command, ok := commandsList[os.Args[1]]; ok {
+            fmt.Printf("%s\n  %s\n", os.Args[1], command.Description)
+        } else {
+            return fmt.Errorf("command %s not found\n", os.Args[1])
+        }
+        return nil
+    }
 
-	for name, _ := range commands.Commands {
-		cmd = append(cmd, name)
-	}
+    fmt.Println("Доступные команды:")
+    cmd := []string{}
 
-	slices.Sort(cmd)
-	for _, name := range cmd {
-		fmt.Printf("%s\n  %s\n", name, commands.Commands[name].Description)
-	}
-	return nil
+    for name := range commandsList {
+        cmd = append(cmd, name)
+    }
+
+    slices.Sort(cmd)
+    for _, name := range cmd {
+        fmt.Printf("%s\n  %s\n", name, commandsList[name].Description)
+    }
+    return nil
 }
