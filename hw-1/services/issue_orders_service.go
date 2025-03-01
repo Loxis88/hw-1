@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// Выдать заказы
+// IssueOrders delivers orders for a customer
 func (s *OrderService) IssueOrders(customerID uint, orderIDs ...uint) error {
 	for _, id := range orderIDs {
 		order, err := s.storage.FindOrder(id)
@@ -14,28 +14,36 @@ func (s *OrderService) IssueOrders(customerID uint, orderIDs ...uint) error {
 			return fmt.Errorf("cannot deliver orders: %w", err)
 		}
 
-		if err := s.isOrderBelongsToCustomer(order, customerID); err != nil {
-			return fmt.Errorf("cannot deliver orders: %w", err)
+		if err := s.checkOrderEligibility(order, customerID); err != nil {
+			return fmt.Errorf("cannot deliver order %d: %w", id, err)
 		}
 
-		if order.Status != models.StatusNew {
-			return fmt.Errorf("cannot deliver order %d: %w", id, ErrOrderCannotBeDelivered)
+		if err := s.processOrder(order); err != nil {
+			return fmt.Errorf("cannot deliver order %d: %w", id, err)
 		}
+	}
+	return nil
+}
 
-		if order.Status == models.StatusNew {
-			if time.Now().After(order.StorageUntil) {
-				order.Status = models.StatusExpired
-				s.storage.UpdateOrder(*order)
-				return fmt.Errorf("cannot deliver order %d: %w", id, ErrOrderCannotBeDelivered)
-			}
+// checkOrderEligibility verifies if order can be delivered
+func (s *OrderService) checkOrderEligibility(order *models.Order, customerID uint) error {
+	if err := s.isOrderBelongsToCustomer(order, customerID); err != nil {
+		return err
+	}
+	if order.Status != models.StatusNew {
+		return ErrOrderCannotBeDelivered
+	}
+	return nil
+}
 
-			order.DeliveredAt = time.Now()
-			if err := s.updateOrderStatus(order, models.StatusDelivered); err != nil {
-				return err
-			}
-		}
-
+// processOrder handles the delivery process
+func (s *OrderService) processOrder(order *models.Order) error {
+	if time.Now().After(order.StorageUntil) {
+		order.Status = models.StatusExpired
+		s.storage.UpdateOrder(*order)
+		return ErrOrderCannotBeDelivered
 	}
 
-	return nil
+	order.DeliveredAt = time.Now()
+	return s.updateOrderStatus(order, models.StatusDelivered)
 }

@@ -16,6 +16,25 @@ const (
 )
 
 func HandleProcessOrders(service services.OrderServiceInterface) error {
+	clientID, orderIDs, action, err := parseFlags()
+	if err != nil {
+		return err
+	}
+
+	if err := validateFlags(clientID, orderIDs, action); err != nil {
+		return err
+	}
+
+	ids, err := parseOrderIDs(*orderIDs)
+	if err != nil {
+		return err
+	}
+
+	return executeAction(service, *clientID, ids, *action)
+}
+
+// parseFlags парсит флаги и возвращает их значения.
+func parseFlags() (*uint, *string, *string, error) {
 	flagSet := flag.NewFlagSet("process-orders", flag.ContinueOnError)
 
 	clientID := flagSet.Uint("client-id", 0, "client ID (required, must be positive)")
@@ -23,9 +42,14 @@ func HandleProcessOrders(service services.OrderServiceInterface) error {
 	action := flagSet.String("action", "", "action: 'return' or 'issue' (required)")
 
 	if err := flagSet.Parse(os.Args[1:]); err != nil {
-		return fmt.Errorf("failed to parse flags: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to parse flags: %w", err)
 	}
 
+	return clientID, orderIDs, action, nil
+}
+
+// validateFlags проверяет, что все флаги заданы корректно.
+func validateFlags(clientID *uint, orderIDs *string, action *string) error {
 	missingFlags := []string{}
 	if *clientID == 0 {
 		missingFlags = append(missingFlags, "-client-id")
@@ -48,9 +72,15 @@ func HandleProcessOrders(service services.OrderServiceInterface) error {
 	if *orderIDs == "" {
 		return fmt.Errorf("order-ids cannot be empty")
 	}
-	orderStrs := strings.Split(*orderIDs, ",")
+
+	return nil
+}
+
+// parseOrderIDs преобразует строку order-ids в массив чисел.
+func parseOrderIDs(orderIDs string) ([]uint, error) {
+	orderStrs := strings.Split(orderIDs, ",")
 	if len(orderStrs) == 0 {
-		return fmt.Errorf("order-ids must contain at least one ID")
+		return nil, fmt.Errorf("order-ids must contain at least one ID")
 	}
 
 	ids := make([]uint, 0, len(orderStrs))
@@ -58,24 +88,29 @@ func HandleProcessOrders(service services.OrderServiceInterface) error {
 		orderStr = strings.TrimSpace(orderStr)
 		id, err := strconv.ParseUint(orderStr, 10, 32)
 		if err != nil {
-			return fmt.Errorf("invalid order ID '%s': %w", orderStr, err)
+			return nil, fmt.Errorf("invalid order ID '%s': %w", orderStr, err)
 		}
 		ids = append(ids, uint(id))
 	}
 
-	switch *action {
+	return ids, nil
+}
+
+// executeAction выполняет действие (return или issue) в зависимости от флага action.
+func executeAction(service services.OrderServiceInterface, clientID uint, ids []uint, action string) error {
+	switch action {
 	case ReturnAction:
-		if err := service.AcceptReturns(*clientID, ids...); err != nil {
+		if err := service.AcceptReturns(clientID, ids...); err != nil {
 			return fmt.Errorf("error returning orders: %w", err)
 		}
 		fmt.Println("Orders returned successfully")
 	case IssueAction:
-		if err := service.IssueOrders(*clientID, ids...); err != nil {
+		if err := service.IssueOrders(clientID, ids...); err != nil {
 			return fmt.Errorf("error issuing orders: %w", err)
 		}
 		fmt.Println("Orders issued successfully")
 	default:
-		return fmt.Errorf("invalid action '%s', must be '%s' or '%s'", *action, ReturnAction, IssueAction)
+		return fmt.Errorf("invalid action '%s', must be '%s' or '%s'", action, ReturnAction, IssueAction)
 	}
 
 	return nil

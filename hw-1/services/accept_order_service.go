@@ -7,7 +7,7 @@ import (
 )
 
 // Принять заказ от курьера
-func (s *OrderService) AcceptOrder(orderID uint, customerID uint, storageDate time.Time, weight float64, cost float64, packageType models.PackageType) error {
+func (s *OrderService) AcceptOrder(orderID uint, customerID uint, storageDate time.Time, weight float64, cost float64, packageType models.PackageType, wrap bool) error {
 	order, _ := s.storage.FindOrder(orderID)
 	if order != nil {
 		return ErrOrderAlreadyExists
@@ -19,11 +19,16 @@ func (s *OrderService) AcceptOrder(orderID uint, customerID uint, storageDate ti
 	}
 
 	if packageType != "" {
-		strategyContex := packaging.NewPackageContext()
+		PackageRegistry := packaging.NewPackageContext()
 
-		strategy, err := strategyContex.GetStrategy(packageType)
+		strategy, err := PackageRegistry.GetStrategy(packageType)
 		if err != nil {
 			return err
+		}
+
+		// Если нужна дополнительная обертка пленкой и это не сама пленка
+		if wrap && packageType != models.PackageTypeFilm {
+			strategy = packaging.NewFilmDecorator(strategy)
 		}
 
 		err = strategy.Validate(weight)

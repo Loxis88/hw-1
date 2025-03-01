@@ -20,6 +20,7 @@ func HandleAcceptOrder(service services.OrderServiceInterface) error {
 	cost := flagSet.Float64("cost", 0, "order cost (required)")
 	weight := flagSet.Float64("weight", 0, "order weight (required)")
 	packageType := flagSet.String("package", "", "order package (optional)")
+	wrap := flagSet.Bool("add-wrap", false, "add film warp (optional) <true/false>")
 
 	if err := flagSet.Parse(os.Args[1:]); err != nil {
 		return fmt.Errorf("failed to parse flags: %w", err)
@@ -46,7 +47,7 @@ func HandleAcceptOrder(service services.OrderServiceInterface) error {
 		return fmt.Errorf("missing required flags: %s", strings.Join(missingFlags, ", "))
 	}
 
-	err := service.AcceptOrder(*orderID, *receiverID, time.Now().Add(time.Duration(*storageDuration)*24*time.Hour), *weight, *cost, models.PackageType(*packageType))
+	err := service.AcceptOrder(*orderID, *receiverID, time.Now().Add(time.Duration(*storageDuration)*24*time.Hour), *weight, *cost, models.PackageType(*packageType), *wrap)
 	if err != nil {
 		return fmt.Errorf("error accepting order: %w", err)
 	}
