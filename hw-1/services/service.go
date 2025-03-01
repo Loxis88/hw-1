@@ -9,7 +9,7 @@ import (
 )
 
 type OrderServiceInterface interface {
-	AcceptOrder(orderID uint, customerID uint, storageDate time.Time) error
+	AcceptOrder(orderID uint, customerID uint, storageDate time.Time, weight float64, cost float64, packageType models.PackageType) error
 	ReturnOrderToCourier(orderID uint) error
 	IssueOrders(customerID uint, orderIDs ...uint) error
 	AcceptReturns(customerID uint, orderIDs ...uint) error

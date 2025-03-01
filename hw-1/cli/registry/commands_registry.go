@@ -11,7 +11,7 @@ import (
 func RegisterCommands() map[string]commands.Command {
 	cmds := make(map[string]commands.Command)
 	cmds[commands.AcceptOrderCommand] = commands.Command{
-		Description: "Принять заказ от курьера\n  Использование: accept-order --order-id <ID> --receiver-id <ID> --storage-duration <DAYS>",
+		Description: "Принять заказ от курьера\n  Использование: accept-order --order-id <ID> --receiver-id <ID> --storage-duration <DAYS> --cost <COST> --weight --package (опциональноб тип упаковки)",
 		Handle:      handlers.HandleAcceptOrder,
 	}
 	cmds[commands.ReturnOrderCommand] = commands.Command{
@@ -42,7 +42,7 @@ func RegisterCommands() map[string]commands.Command {
 		Description: "Выдать заказы или принять возвраты\n  Использование: process-orders --client-id <ID> --order-ids <ID1,ID2,...> --action <issue|return>",
 		Handle:      handlers.HandleProcessOrders,
 	}
-	// тут костыль с замыканием поэтому добавление хелп команды в мапу всегда должно быть в конце
+	// тут костыль с замыканием
 	cmds[commands.HelpCommand] = commands.Command{
 		Description: "Ввести инормацию по командам (команде)\n  Использование: help [имя команды] (необязательный параметр)\n",
 		Handle: func(service services.OrderServiceInterface) error {

@@ -30,8 +30,6 @@ func New(storageType string, config string) (OrderStorage, error) {
 type StorageFactory func(config string) (OrderStorage, error)
 
 // registry - это мапа, где хранятся все доступные типы хранилищ
-// идея в том что эта мапа хранит все определенные функции инициализации хранилищ которые будут определяться непосредственно в пакетах хранилищ
-// что позволит расширять код без его изменения
 var registry = make(map[string]StorageFactory)
 
 // RegisterStorage - добавляет новый тип хранилища в мапу
